@@ -75,70 +75,70 @@
             border-radius: 0.5rem;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
+        .sidebar {
+            width: 250px;
+            background-color: #3b82f6; /* Blue background */
+            padding: 1rem;
+            color: white;
+            height: 100vh; /* Full height */
+            position: fixed; /* Fixed sidebar */
+        }
+        .sidebar a {
+            display: block;
+            color: white;
+            text-decoration: none;
+            padding: 10px 15px;
+            margin: 5px 0;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        .sidebar a:hover {
+            background-color: #4f46e5; /* Darker blue on hover */
+        }
+        .sidebar .active {
+            background-color: #4338ca; /* Active link color */
+        }
+        .main-content {
+            margin-left: 260px; /* Space for sidebar */
+            padding: 1rem;
+            flex-grow: 1; /* Allow main content to grow */
+        }
+        .section {
+            margin-bottom: 2rem; /* Space between sections */
+        }
     </style>
 </head>
 
 <body class="font-inter antialiased bg-gray-50 text-gray-900 tracking-tight">
-    <nav class="navbar">
-        <div class="container">
-            <a href="/" class="text-2xl font-bold">MovingLeads</a>
-            <div class="space-x-4">
-                <a href="/dashboard" class="btn">Dashboard</a>
-                <a href="/leads" class="btn">Leads</a>
-                <a href="/mailers" class="btn">Mailers</a>
-                <a href="/analytics" class="btn">Analytics</a>
-                <a href="/settings" class="btn">Settings</a>
-            </div>
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h2 class="text-2xl font-bold mb-10">⚡ SoldAlert</h2>
+            <a href="dashboard.html" class="active mb-4 p-2">🏠 Dashboard</a>
+            <a href="#" class="mb-4 p-2">💳 Buy Credits</a>
+            <a href="#" class="mb-4 p-2">📄 My Leads</a>
+            <a href="#" class="mb-4 p-2">⚙️ Settings</a>
+            <a href="logout.html" class="mt-auto p-2 bg-red-600 rounded hover:bg-red-500">🚪 Logout</a>
         </div>
-    </nav>
 
-    <!-- Page wrapper -->
-    <div class="flex flex-col min-h-screen overflow-hidden supports-[overflow:clip]:overflow-clip">
-        
-        <!-- Site header -->
-        <header class="absolute w-full z-30">
-            <div class="max-w-6xl mx-auto px-4 sm:px-6">
-                <div class="flex items-center justify-between h-16 md:h-20">
-                    <!-- Site branding -->
-                    <div class="shrink-0 mr-4">
-                        <!-- Logo -->
-                        <a class="inline-flex" href="index.html" aria-label="Cruip">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28">
-                                <path class="fill-blue-500" fill-rule="evenodd"
-                                    d="M15.052 0c6.914.513 12.434 6.033 12.947 12.947h-5.015a7.932 7.932 0 0 1-7.932-7.932V0Zm-2.105 22.985V28C6.033 27.487.513 21.967 0 15.053h5.015a7.932 7.932 0 0 1 7.932 7.932Z"
-                                    clip-rule="evenodd" />
-                                <path class="fill-blue-300" fill-rule="evenodd"
-                                    d="M0 12.947C.513 6.033 6.033.513 12.947 0v5.015a7.932 7.932 0 0 1-7.932 7.932H0Zm22.984 2.106h5.015C27.486 21.967 21.966 27.487 15.052 28v-5.015a7.932 7.932 0 0 1 7.932-7.932Z"
-                                    clip-rule="evenodd" />
-                            </svg>
-                        </a>
-                    </div>
-                    <!-- Logout Button -->
-                    <div>
-                        <button id="logoutButton" class="btn text-white bg-red-500 hover:bg-red-600">Logout</button>
-                    </div>
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="section">
+                <h1 class="text-4xl font-bold mb-6">Dashboard</h1>
+                <div id="welcomeMessage" class="text-lg mb-4"></div>
+                <div class="mb-8">
+                    <h1 class="text-4xl font-bold">Welcome, John 👋</h1>
+                    <p class="mt-2 text-lg">You have <span id="credits" class="font-semibold text-green-500">15</span> Credits remaining</p>
                 </div>
-            </div>
-        </header>
 
-        <main class="relative grow flex">
-            <!-- Content -->
-            <div class="w-full max-w-6xl mx-auto px-4 sm:px-6">
-                <div class="py-16 md:py-20">
-                    <h1 class="text-4xl font-bold mb-6">Dashboard</h1>
-                    <div id="welcomeMessage" class="text-lg mb-4"></div>
-                    <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-                        <!-- Overview Section -->
-                        <div class="bg-white p-6 rounded-lg shadow">
-                            <h2 class="text-xl font-bold mb-4">Overview</h2>
-                            <p>Credits: <span id="credits">0</span></p>
-                            <p>Plan Type: <span id="planType">Basic</span></p>
-                            <p>Remaining Leads: <span id="leadsQuota">0</span></p>
-                            <p>Remaining Mails: <span id="mailQuota">0</span></p>
-                            <button id="addFundsButton" class="btn mt-4 bg-blue-500 text-white">Add Funds</button>
-                        </div>
-                    </div>
-                    <!-- New Leads Feed Section -->
+                <div class="bg-white shadow rounded-lg p-6 mb-10">
+                    <h2 class="text-2xl font-bold mb-4">🔍 Unlock More Listings</h2>
+                    <p class="mb-6">Buy more credits to continue accessing exclusive leads.</p>
+                    <button onclick="buyCredits()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-500">💰 Buy Credits</button>
+                </div>
+
+                <div class="section bg-white shadow rounded-lg p-6">
+                    <h2 class="text-2xl font-bold mb-4">📄 My Leads</h2>
                     <div class="bg-white p-6 rounded-lg shadow mt-8">
                         <h2 class="text-xl font-bold mb-4">Leads Feed</h2>
                         <table class="min-w-full bg-white border border-gray-300">
@@ -158,7 +158,7 @@
                     </div>
                 </div>
             </div>
-        </main>
+        </div>
     </div>
 
     <footer class="footer">
@@ -267,31 +267,6 @@
             // Initialize credits
             let credits = parseInt(sessionStorage.getItem('credits')) || 0;
             document.getElementById('credits').textContent = credits;
-
-            // Logout functionality
-            document.getElementById('logoutButton').addEventListener('click', function() {
-                auth.signOut().then(() => {
-                    sessionStorage.clear();
-                    window.location.href = 'signin.html';
-                }).catch((error) => {
-                    console.error('Error signing out:', error);
-                });
-            });
-
-            // Add funds functionality
-            document.getElementById('addFundsButton').addEventListener('click', function() {
-                document.getElementById('paymentModal').classList.remove('hidden');
-            });
-
-            // View leads functionality
-            const viewLeadsButton = document.getElementById('viewLeadsButton');
-            if (viewLeadsButton) {
-                viewLeadsButton.addEventListener('click', function() {
-                    console.log("View Leads button clicked.");
-                    fetchLeads(currentPage); // Call fetchLeads directly to display records
-                    alert("Leads are being displayed."); // Optional: Notify the user
-                });
-            }
 
             // Fetch leads when the page loads
             fetchLeads(currentPage);
