@@ -64,9 +64,16 @@
             background-color: #4338ca; /* Darker Indigo */
         }
         .leads-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem; /* Space between lead cards */
+        }
+        .lead-card {
+            flex: 1 1 calc(30% - 1rem); /* Adjust width as needed */
+            background: white;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
     </style>
 </head>
@@ -130,17 +137,24 @@
                             <p>Remaining Mails: <span id="mailQuota">0</span></p>
                             <button id="addFundsButton" class="btn mt-4 bg-blue-500 text-white">Add Funds</button>
                         </div>
-                        <!-- Leads Feed Section -->
-                        <div class="bg-white p-6 rounded-lg shadow">
-                            <h2 class="text-xl font-bold mb-4">Leads Feed</h2>
-                            <div id="leadsContainer" class="leads-container"></div>
-                            <div id="pagination" class="mt-4 flex justify-center"></div>
-                        </div>
-                        <!-- Mailers Section -->
-                        <div class="bg-white p-6 rounded-lg shadow">
-                            <h2 class="text-xl font-bold mb-4">Mailers</h2>
-                            <p>Manage your mail campaigns.</p>
-                        </div>
+                    </div>
+                    <!-- New Leads Feed Section -->
+                    <div class="bg-white p-6 rounded-lg shadow mt-8">
+                        <h2 class="text-xl font-bold mb-4">Leads Feed</h2>
+                        <table class="min-w-full bg-white border border-gray-300">
+                            <thead>
+                                <tr>
+                                    <th class="py-2 px-4 border-b">ID</th>
+                                    <th class="py-2 px-4 border-b">Address</th>
+                                    <th class="py-2 px-4 border-b">Price</th>
+                                    <th class="py-2 px-4 border-b">City</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leadsContainer">
+                                <!-- Leads will be populated here -->
+                            </tbody>
+                        </table>
+                        <div id="pagination" class="mt-4 flex justify-center"></div>
                     </div>
                 </div>
             </div>
@@ -204,13 +218,12 @@
             leadsContainer.innerHTML = ''; // Clear existing content
 
             data.forEach(lead => {
-                const leadCard = document.createElement('div');
-                leadCard.className = 'lead-card bg-white p-4 rounded-lg shadow mb-4';
+                const leadCard = document.createElement('tr');
                 leadCard.innerHTML = `
-                    <h3 class="font-bold text-lg">ID: ${lead.id}</h3>
-                    <p><strong>Address:</strong> ${lead.address}</p>
-                    <p><strong>Price:</strong> $${lead.price}</p>
-                    <p><strong>City:</strong> ${lead.addressCity}</p>
+                    <td class="py-2 px-4 border-b">${lead.id}</td>
+                    <td class="py-2 px-4 border-b">${lead.address}</td>
+                    <td class="py-2 px-4 border-b">$${lead.price}</td>
+                    <td class="py-2 px-4 border-b">${lead.addressCity}</td>
                 `; // Adjust based on your table structure
                 leadsContainer.appendChild(leadCard);
             });
