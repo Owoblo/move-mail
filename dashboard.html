@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="utf-8">
+    <title>Dashboard - MoveMail Pro</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link href="./css/vendors/aos.css" rel="stylesheet">
+    <link href="./style.css" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script src="https://js.stripe.com/v3/"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f9fafb; /* Light gray background */
+            color: #374151; /* Dark gray text */
+        }
+        .navbar {
+            background-color: #3b82f6; /* Blue background */
+            padding: 1rem;
+            color: white;
+        }
+        .navbar .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            margin-left: 1rem;
+        }
+        .footer {
+            background-color: #f3f4f6; /* Light gray footer */
+            padding: 1rem;
+            text-align: center;
+            margin-top: 2rem;
+        }
+        .lead-card {
+            transition: box-shadow 0.3s ease;
+        }
+        .lead-card:hover {
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+        .pagination-btn {
+            margin: 0 5px;
+            padding: 10px 15px;
+            background-color: #4f46e5; /* Indigo */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .pagination-btn:disabled {
+            background-color: #a1a1aa; /* Gray */
+            cursor: not-allowed;
+        }
+        .pagination-btn:hover:not(:disabled) {
+            background-color: #4338ca; /* Darker Indigo */
+        }
+        .leads-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+    </style>
+</head>
+
+<body class="font-inter antialiased bg-gray-50 text-gray-900 tracking-tight">
+    <nav class="navbar">
+        <div class="container">
+            <a href="/" class="text-2xl font-bold">MovingLeads</a>
+            <div class="space-x-4">
+                <a href="/dashboard" class="btn">Dashboard</a>
+                <a href="/leads" class="btn">Leads</a>
+                <a href="/mailers" class="btn">Mailers</a>
+                <a href="/analytics" class="btn">Analytics</a>
+                <a href="/settings" class="btn">Settings</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page wrapper -->
+    <div class="flex flex-col min-h-screen overflow-hidden supports-[overflow:clip]:overflow-clip">
+        
+        <!-- Site header -->
+        <header class="absolute w-full z-30">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6">
+                <div class="flex items-center justify-between h-16 md:h-20">
+                    <!-- Site branding -->
+                    <div class="shrink-0 mr-4">
+                        <!-- Logo -->
+                        <a class="inline-flex" href="index.html" aria-label="Cruip">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28">
+                                <path class="fill-blue-500" fill-rule="evenodd"
+                                    d="M15.052 0c6.914.513 12.434 6.033 12.947 12.947h-5.015a7.932 7.932 0 0 1-7.932-7.932V0Zm-2.105 22.985V28C6.033 27.487.513 21.967 0 15.053h5.015a7.932 7.932 0 0 1 7.932 7.932Z"
+                                    clip-rule="evenodd" />
+                                <path class="fill-blue-300" fill-rule="evenodd"
+                                    d="M0 12.947C.513 6.033 6.033.513 12.947 0v5.015a7.932 7.932 0 0 1-7.932 7.932H0Zm22.984 2.106h5.015C27.486 21.967 21.966 27.487 15.052 28v-5.015a7.932 7.932 0 0 1 7.932-7.932Z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </a>
+                    </div>
+                    <!-- Logout Button -->
+                    <div>
+                        <button id="logoutButton" class="btn text-white bg-red-500 hover:bg-red-600">Logout</button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="relative grow flex">
+            <!-- Content -->
+            <div class="w-full max-w-6xl mx-auto px-4 sm:px-6">
+                <div class="py-16 md:py-20">
+                    <h1 class="text-4xl font-bold mb-6">Dashboard</h1>
+                    <div id="welcomeMessage" class="text-lg mb-4"></div>
+                    <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+                        <!-- Overview Section -->
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <h2 class="text-xl font-bold mb-4">Overview</h2>
+                            <p>Credits: <span id="credits">0</span></p>
+                            <p>Plan Type: <span id="planType">Basic</span></p>
+                            <p>Remaining Leads: <span id="leadsQuota">0</span></p>
+                            <p>Remaining Mails: <span id="mailQuota">0</span></p>
+                            <button id="addFundsButton" class="btn mt-4 bg-blue-500 text-white">Add Funds</button>
+                        </div>
+                        <!-- Leads Feed Section -->
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <h2 class="text-xl font-bold mb-4">Leads Feed</h2>
+                            <div id="leadsContainer" class="leads-container"></div>
+                            <div id="pagination" class="mt-4 flex justify-center"></div>
+                        </div>
+                        <!-- Mailers Section -->
+                        <div class="bg-white p-6 rounded-lg shadow">
+                            <h2 class="text-xl font-bold mb-4">Mailers</h2>
+                            <p>Manage your mail campaigns.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <footer class="footer">
+        <p>&copy; 2023 MovingLeads. All rights reserved.</p>
+        <div class="mt-2">
+            <a href="/terms" class="text-blue-600 hover:underline">Terms of Service</a>
+            {" | "}
+            <a href="/privacy" class="text-blue-600 hover:underline">Privacy Policy</a>
+        </div>
+    </footer>
+
+    <script src="./js/vendors/alpinejs.min.js" defer></script>
+    <script src="./js/vendors/aos.js"></script>
+    <script src="./js/main.js"></script>
+    <script>
+        console.log("Initializing Supabase...");
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC3gySP9p__sdCvaWbATUqeMfGknjUJ6lk",
+            authDomain: "movemail-pro.firebaseapp.com",
+            projectId: "movemail-pro",
+            storageBucket: "movemail-pro.firebasestorage.app",
+            messagingSenderId: "690054651728",
+            appId: "1:690054651728:web:fb0ecac3bf2926dd0c9655",
+            measurementId: "G-FZZW13YK7Z"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // Initialize Supabase
+        const supabaseUrl = 'https://idbyrtwdeeruiutoukct.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlkYnlydHdkZWVydWl1dG91a2N0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzgyNTk0NjQsImV4cCI6MjA1MzgzNTQ2NH0.Hw0oJmIuDGdITM3TZkMWeXkHy53kO4i8TCJMxb6_hko';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+        console.log("Supabase client initialized successfully.");
+
+        let currentPage = 1;
+        const recordsPerPage = 10;
+
+        async function fetchLeads(page) {
+            console.log("Fetching leads from Supabase...");
+            const { data, error } = await supabaseClient
+                .from('sold_listings') // Replace with your table name
+                .select('*')
+                .range((page - 1) * recordsPerPage, page * recordsPerPage - 1); // Pagination logic
+
+            if (error) {
+                console.error('Error fetching leads:', error);
+                return;
+            }
+
+            const leadsContainer = document.getElementById('leadsContainer');
+            leadsContainer.innerHTML = ''; // Clear existing content
+
+            data.forEach(lead => {
+                const leadCard = document.createElement('div');
+                leadCard.className = 'lead-card bg-white p-4 rounded-lg shadow mb-4';
+                leadCard.innerHTML = `
+                    <h3 class="font-bold text-lg">ID: ${lead.id}</h3>
+                    <p><strong>Address:</strong> ${lead.address}</p>
+                    <p><strong>Price:</strong> $${lead.price}</p>
+                    <p><strong>City:</strong> ${lead.addressCity}</p>
+                `; // Adjust based on your table structure
+                leadsContainer.appendChild(leadCard);
+            });
+
+            updatePagination(page);
+        }
+
+        function updatePagination(page) {
+            const paginationContainer = document.getElementById('pagination');
+            paginationContainer.innerHTML = ''; // Clear existing pagination
+
+            const prevButton = document.createElement('button');
+            prevButton.textContent = 'Previous';
+            prevButton.disabled = page === 1;
+            prevButton.className = 'btn pagination-btn';
+            prevButton.onclick = () => {
+                if (page > 1) {
+                    currentPage--;
+                    fetchLeads(currentPage);
+                }
+            };
+            paginationContainer.appendChild(prevButton);
+
+            const nextButton = document.createElement('button');
+            nextButton.textContent = 'Next';
+            nextButton.className = 'btn pagination-btn';
+            nextButton.onclick = () => {
+                currentPage++;
+                fetchLeads(currentPage);
+            };
+            paginationContainer.appendChild(nextButton);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("DOM fully loaded and parsed.");
+            const userName = sessionStorage.getItem('userName');
+            if (userName) {
+                document.getElementById('welcomeMessage').textContent = `Welcome, ${userName}`;
+            }
+
+            // Initialize credits
+            let credits = parseInt(sessionStorage.getItem('credits')) || 0;
+            document.getElementById('credits').textContent = credits;
+
+            // Logout functionality
+            document.getElementById('logoutButton').addEventListener('click', function() {
+                auth.signOut().then(() => {
+                    sessionStorage.clear();
+                    window.location.href = 'signin.html';
+                }).catch((error) => {
+                    console.error('Error signing out:', error);
+                });
+            });
+
+            // Add funds functionality
+            document.getElementById('addFundsButton').addEventListener('click', function() {
+                document.getElementById('paymentModal').classList.remove('hidden');
+            });
+
+            // View leads functionality
+            const viewLeadsButton = document.getElementById('viewLeadsButton');
+            if (viewLeadsButton) {
+                viewLeadsButton.addEventListener('click', function() {
+                    console.log("View Leads button clicked.");
+                    fetchLeads(currentPage); // Call fetchLeads directly to display records
+                    alert("Leads are being displayed."); // Optional: Notify the user
+                });
+            }
+
+            // Fetch leads when the page loads
+            fetchLeads(currentPage);
+        });
+
+        // Firebase Auth State Change Listener
+        firebase.auth().onAuthStateChanged(async (user) => {
+            if (user) {
+                const userRef = firebase.firestore().collection("users").doc(user.uid);
+
+                // Check if the user already exists
+                const doc = await userRef.get();
+                if (!doc.exists) {
+                    // If not, create a new entry with 0 credits
+                    await userRef.set({
+                        email: user.email,
+                        credits: 0,
+                    });
+                    console.log(`User ${user.email} created with 0 credits.`);
+                    document.getElementById('credits').textContent = '0'; // Update credits display
+                } else {
+                    // Fetch user data
+                    const userData = doc.data();
+                    const credits = userData.credits || 0; // Default to 0 if credits is undefined
+                    console.log(`User ${user.email} has ${credits} credits.`);
+                    document.getElementById('credits').textContent = credits; // Update credits display
+                }
+            }
+        });
+    </script>
+
+    <!-- Payment Modal -->
+    <div id="paymentModal" class="hidden">
+        <div class="modal-content">
+            <h2>Add Funds</h2>
+            <div>
+                <button class="btn" onclick="redirectToStripe(100)">Buy 180 Credits - $100</button>
+                <button class="btn" onclick="redirectToStripe(200)">Buy 400 Credits - $200</button>
+                <button class="btn" onclick="redirectToStripe(1000)">Buy 2200 Credits - $1000</button>
+            </div>
+            <div>
+                <input type="number" id="customAmount" placeholder="Enter custom amount" />
+                <button class="btn" onclick="calculateCredits()">Calculate Credits</button>
+                <p id="customCredits"></p>
+                <button class="btn" onclick="redirectToStripe(customAmount)">Buy Custom Credits</button>
+            </div>
+            <button class="btn" onclick="closeModal()">Close</button>
+        </div>
+    </div>
+</body>
+
+</html> 

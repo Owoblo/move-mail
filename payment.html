@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="utf-8">
+    <title>Payment - MoveMail Pro</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link href="./css/vendors/aos.css" rel="stylesheet">
+    <link href="./style.css" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script src="https://js.stripe.com/v3/"></script>
+    <script>
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC3gySP9p__sdCvaWbATUqeMfGknjUJ6lk",
+            authDomain: "movemail-pro.firebaseapp.com",
+            projectId: "movemail-pro",
+            storageBucket: "movemail-pro.firebasestorage.app",
+            messagingSenderId: "690054651728",
+            appId: "1:690054651728:web:fb0ecac3bf2926dd0c9655",
+            measurementId: "G-FZZW13YK7Z"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+    </script>
+</head>
+
+<body class="font-inter antialiased bg-gray-50 text-gray-900 tracking-tight">
+
+    <!-- Page wrapper -->
+    <div class="flex flex-col min-h-screen overflow-hidden supports-[overflow:clip]:overflow-clip">
+        
+        <!-- Site header -->
+        <header class="absolute w-full z-30">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6">
+                <div class="flex items-center justify-between h-16 md:h-20">
+                    <!-- Site branding -->
+                    <div class="shrink-0 mr-4">
+                        <!-- Logo -->
+                        <a class="inline-flex" href="index.html" aria-label="Cruip">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28">
+                                <path class="fill-blue-500" fill-rule="evenodd"
+                                    d="M15.052 0c6.914.513 12.434 6.033 12.947 12.947h-5.015a7.932 7.932 0 0 1-7.932-7.932V0Zm-2.105 22.985V28C6.033 27.487.513 21.967 0 15.053h5.015a7.932 7.932 0 0 1 7.932 7.932Z"
+                                    clip-rule="evenodd" />
+                                <path class="fill-blue-300" fill-rule="evenodd"
+                                    d="M0 12.947C.513 6.033 6.033.513 12.947 0v5.015a7.932 7.932 0 0 1-7.932 7.932H0Zm22.984 2.106h5.015C27.486 21.967 21.966 27.487 15.052 28v-5.015a7.932 7.932 0 0 1 7.932-7.932Z"
+                                    clip-rule="evenodd" />
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="relative grow flex">
+            <!-- Content -->
+            <div class="w-full max-w-6xl mx-auto px-4 sm:px-6">
+                <div class="py-16 md:py-20">
+                    <h1 class="text-4xl font-bold mb-6">Add Funds</h1>
+                    <form id="payment-form">
+                        <div class="mb-4">
+                            <label for="creditsInput" class="block text-sm font-medium text-gray-700">Credits</label>
+                            <input type="number" id="creditsInput" class="form-input mt-1 block w-full" placeholder="Enter credits" required>
+                        </div>
+                        <div class="mb-4">
+                            <label for="card-element" class="block text-sm font-medium text-gray-700">Card Details</label>
+                            <div id="card-element" class="form-input mt-1 block w-full"></div>
+                        </div>
+                        <button id="submit" class="btn mt-4 bg-blue-500 text-white w-full">Pay</button>
+                    </form>
+                    <div id="payment-message" class="mt-4 text-red-500"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const stripe = Stripe('your-publishable-key');
+        const elements = stripe.elements();
+        const cardElement = elements.create('card');
+        cardElement.mount('#card-element');
+
+        document.getElementById('payment-form').addEventListener('submit', async (event) => {
+            event.preventDefault();
+
+            const credits = parseInt(document.getElementById('creditsInput').value);
+            if (isNaN(credits) || credits <= 0) {
+                document.getElementById('payment-message').textContent = 'Please enter a valid number of credits.';
+                return;
+            }
+
+            try {
+                const clientSecret = await createPaymentIntent(credits);
+                const { paymentIntent, error } = await stripe.confirmCardPayment(clientSecret, {
+                    payment_method: {
+                        card: cardElement,
+                    }
+                });
+
+                if (error) {
+                    console.error(error);
+                    document.getElementById('payment-message').textContent = 'Payment failed';
+                } else {
+                    document.getElementById('payment-message').textContent = 'Payment successful';
+                    updateCreditsInFirestore(credits);
+                }
+            } catch (error) {
+                console.error('Error creating payment intent:', error);
+                document.getElementById('payment-message').textContent = 'Error processing payment';
+            }
+        });
+
+        async function createPaymentIntent(credits) {
+            const response = await fetch('https://idbyrtwdeeruiutoukct.supabase.co/functions/v1/my-function', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlkYnlydHdkZWVydWl1dG91a2N0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzgyNTk0NjQsImV4cCI6MjA1MzgzNTQ2NH0Hw0oJmIuDGdITM3TZkMWeXkHy53kO4i8TCJMxb6_hko}`
+                },
+                body: JSON.stringify({ amount: credits })
+            });
+
+            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error || 'Failed to create payment intent');
+            }
+            return data.clientSecret;
+        }
+
+        function updateCreditsInFirestore(credits) {
+            const userId = firebase.auth().currentUser.uid;
+            const userRef = firebase.firestore().collection('users').doc(userId);
+
+            userRef.update({
+                credits: firebase.firestore.FieldValue.increment(credits)
+            }).then(() => {
+                console.log('Credits updated successfully');
+            }).catch((error) => {
+                console.error('Error updating credits:', error);
+            });
+        }
+    </script>
+</body>
+
+</html> 
