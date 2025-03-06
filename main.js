@@ -292,3 +292,18 @@ async function fetchUserListings(userId) {
         listingsContainer.appendChild(listingElement);
     });
 }
+
+// Example of adjusting layout based on screen size
+function adjustLayout() {
+    if (window.innerWidth < 768) {
+        // Adjust layout for mobile
+        console.log("Mobile layout adjustments");
+    } else {
+        // Adjust layout for desktop
+        console.log("Desktop layout adjustments");
+    }
+}
+
+// Call adjustLayout on load and resize
+window.addEventListener('load', adjustLayout);
+window.addEventListener('resize', adjustLayout);
