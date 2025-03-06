@@ -8,14 +8,15 @@ console.log("Initializing Supabase...");
 
 // Firebase Configuration
 const firebaseConfig = {
-    apiKey: process.env.FIREBASE_API_KEY,
-    authDomain: process.env.FIREBASE_AUTH_DOMAIN,
-    projectId: process.env.FIREBASE_PROJECT_ID,
-    storageBucket: process.env.FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: process.env.FIREBASE_MESSAGING_SENDER_ID,
-    appId: process.env.FIREBASE_APP_ID,
-    measurementId: process.env.FIREBASE_MEASUREMENT_ID
+    apiKey: "AIzaSyC3gySP9p__sdCvaWbATUqeMfGknjUJ6lk",
+    authDomain: "movemail-pro.firebaseapp.com",
+    projectId: "movemail-pro",
+    storageBucket: "movemail-pro.firebasestorage.app",
+    messagingSenderId: "690054651728",
+    appId: "1:690054651728:web:fb0ecac3bf2926dd0c9655",
+    measurementId: "G-FZZW13YK7Z"
 };
+
 
 // Initialize Firebase
 const app = firebase.initializeApp(firebaseConfig);
@@ -23,8 +24,8 @@ const auth = firebase.auth();
 const db = firebase.firestore();
 
 // Initialize Supabase
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_KEY;
+const supabaseUrl = 'https://idbyrtwdeeruiutoukct.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlkYnlydHdkZWVydWl1dG91a2N0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzgyNTk0NjQsImV4cCI6MjA1MzgzNTQ2NH0.Hw0oJmIuDGdITM3TZkMWeXkHy53kO4i8TCJMxb6_hko';
 const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
 console.log("Supabase client initialized successfully.");
