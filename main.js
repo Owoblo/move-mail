@@ -1,8 +1,8 @@
 // main.js
-import dotenv from 'dotenv';
+// import dotenv from 'dotenv';
 
-// Load environment variables from .env file
-dotenv.config();
+// // Load environment variables from .env file
+// dotenv.config();
 
 console.log("Initializing Supabase...");
 
