@@ -172,7 +172,7 @@ async function fetchCitiesByProvince() {
     }
 
     const { data, error } = await supabaseClient
-        .from('cities')
+        .from('cities') // Ensure this is the correct table name
         .select('*')
         .eq('province', province); // Fetch cities for the selected province
 
@@ -211,6 +211,9 @@ document.getElementById('city-selection-form').addEventListener('submit', async 
         alert('User is not logged in. Please log in again.');
         return; // Exit if user ID is not found
     }
+
+    console.log('Selected Cities:', selectedCities);
+    console.log('User ID:', userId);
 
     // Clear existing preferences for the user
     await supabaseClient
