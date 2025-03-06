@@ -147,6 +147,9 @@
         const auth = firebase.auth();
     </script>
 
+    <!-- Add a div for displaying messages -->
+    <div id="message" class="text-red-500 mt-4"></div>
+
     <script>
         document.getElementById('signUpButton').addEventListener('click', signUp);
 
@@ -156,16 +159,17 @@
 
             auth.createUserWithEmailAndPassword(email, password)
                 .then((userCredential) => {
-                    // Signed in 
                     const user = userCredential.user;
-                    alert('User registered successfully!');
+                    // Display success message
+                    document.getElementById('message').textContent = 'User registered successfully!';
                     // Redirect to login page
                     window.location.href = 'signin.html';
                 })
                 .catch((error) => {
                     const errorCode = error.code;
                     const errorMessage = error.message;
-                    alert(errorMessage);
+                    // Display error message
+                    document.getElementById('message').textContent = errorMessage;
                 });
         }
     </script>

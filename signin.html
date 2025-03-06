@@ -99,6 +99,9 @@
                                     <a class="text-sm text-gray-700 underline hover:no-underline" href="reset-password.html">Forgot password</a>
                                 </div>
 
+                                <!-- Add a div for displaying messages -->
+                                <div id="message" class="text-red-500 mt-4"></div>
+
                             </div>
                         </div>
                     </div>
@@ -147,7 +150,8 @@
             auth.signInWithEmailAndPassword(email, password)
                 .then((userCredential) => {
                     const user = userCredential.user;
-                    alert('User signed in successfully!');
+                    // Display success message
+                    document.getElementById('message').textContent = 'User signed in successfully!';
                     // Store user info in session storage
                     sessionStorage.setItem('userName', user.displayName || 'User');
                     sessionStorage.setItem('userId', user.uid); // Store user ID
@@ -157,7 +161,8 @@
                 .catch((error) => {
                     const errorCode = error.code;
                     const errorMessage = error.message;
-                    alert(errorMessage);
+                    // Display error message
+                    document.getElementById('message').textContent = errorMessage;
                 });
         }
     </script>
