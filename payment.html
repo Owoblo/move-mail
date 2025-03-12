@@ -62,17 +62,11 @@
             <div class="w-full max-w-6xl mx-auto px-4 sm:px-6">
                 <div class="py-16 md:py-20">
                     <h1 class="text-4xl font-bold mb-6">Add Funds</h1>
-                    <form id="payment-form">
-                        <div class="mb-4">
-                            <label for="creditsInput" class="block text-sm font-medium text-gray-700">Credits</label>
-                            <input type="number" id="creditsInput" class="form-input mt-1 block w-full" placeholder="Enter credits" required>
-                        </div>
-                        <div class="mb-4">
-                            <label for="card-element" class="block text-sm font-medium text-gray-700">Card Details</label>
-                            <div id="card-element" class="form-input mt-1 block w-full"></div>
-                        </div>
-                        <button id="submit" class="btn mt-4 bg-blue-500 text-white w-full">Pay</button>
-                    </form>
+                    <div class="mb-4">
+                        <button id="package-1" class="btn mt-4 bg-blue-500 text-white w-full" onclick="buyCredits(100, 250)">Buy 250 Credits - $100</button>
+                        <button id="package-2" class="btn mt-4 bg-blue-500 text-white w-full" onclick="buyCredits(500, 2000)">Buy 2000 Credits - $500</button>
+                        <button id="package-3" class="btn mt-4 bg-blue-500 text-white w-full" onclick="buyCredits(2000, 'unlimited')">Buy Unlimited Credits - $2000</button>
+                    </div>
                     <div id="payment-message" class="mt-4 text-red-500"></div>
                 </div>
             </div>
@@ -85,18 +79,10 @@
         const cardElement = elements.create('card');
         cardElement.mount('#card-element');
 
-        document.getElementById('payment-form').addEventListener('submit', async (event) => {
-            event.preventDefault();
-
-            const credits = parseInt(document.getElementById('creditsInput').value);
-            if (isNaN(credits) || credits <= 0) {
-                document.getElementById('payment-message').textContent = 'Please enter a valid number of credits.';
-                return;
-            }
-
+        async function buyCredits(amount, credits) {
             try {
-                const clientSecret = await createPaymentIntent(credits);
-                const { paymentIntent, error } = await stripe.confirmCardPayment(clientSecret, {
+                const clientSecret = await createPaymentIntent(amount);
+                const { error } = await stripe.confirmCardPayment(clientSecret, {
                     payment_method: {
                         card: cardElement,
                     }
@@ -113,16 +99,16 @@
                 console.error('Error creating payment intent:', error);
                 document.getElementById('payment-message').textContent = 'Error processing payment';
             }
-        });
+        }
 
-        async function createPaymentIntent(credits) {
+        async function createPaymentIntent(amount) {
             const response = await fetch('https://idbyrtwdeeruiutoukct.supabase.co/functions/v1/my-function', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlkYnlydHdkZWVydWl1dG91a2N0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzgyNTk0NjQsImV4cCI6MjA1MzgzNTQ2NH0Hw0oJmIuDGdITM3TZkMWeXkHy53kO4i8TCJMxb6_hko}`
+                    'Authorization': `Bearer ${your_supabase_anon_key}`
                 },
-                body: JSON.stringify({ amount: credits })
+                body: JSON.stringify({ amount })
             });
 
             const data = await response.json();
