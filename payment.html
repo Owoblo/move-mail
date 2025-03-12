@@ -63,7 +63,7 @@
                 <div class="py-16 md:py-20">
                     <h1 class="text-4xl font-bold mb-6">Add Funds</h1>
                     <div class="mb-4">
-                        <button id="package-1" class="btn mt-4 bg-blue-500 text-white w-full" onclick="https://buy.stripe.com/14kaIJ2ZEgEMd0c28a">Buy 250 Credits - $100</button>
+                        <button id="package-1" class="btn mt-4 bg-blue-500 text-white w-full" onclick="buyCredits(100, 250)">Buy 250 Credits - $100</button>
                         <button id="package-2" class="btn mt-4 bg-blue-500 text-white w-full" onclick="buyCredits(500, 2000)">Buy 2000 Credits - $500</button>
                         <button id="package-3" class="btn mt-4 bg-blue-500 text-white w-full" onclick="buyCredits(2000, 'unlimited')">Buy Unlimited Credits - $2000</button>
                     </div>
@@ -74,7 +74,7 @@
     </div>
 
     <script>
-        const stripe = Stripe('your-publishable-key');
+        const stripe = Stripe('pk_live_51O7k34CUfCzyitr0zsOHHPpYKBs5fWd0xZl4d5ybCLx85oFigGSqbDHBvHJZN7icxOYU3hpwy8ZLaPl91Mj6DjRQ009TyjV9WX');
         const elements = stripe.elements();
         const cardElement = elements.create('card');
         cardElement.mount('#card-element');
@@ -94,6 +94,7 @@
                 } else {
                     document.getElementById('payment-message').textContent = 'Payment successful';
                     updateCreditsInFirestore(credits);
+                    await recordPayment(firebase.auth().currentUser.uid, amount, credits, 'succeeded');
                 }
             } catch (error) {
                 console.error('Error creating payment intent:', error);
@@ -106,7 +107,7 @@
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${your_supabase_anon_key}`
+                    'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlkYnlydHdkZWVydWl1dG91a2N0Iiwicm9zZSI6ImFub24iLCJpYXQiOjE3MzgyNTk0NjQsImV4cCI6MjA1MzgzNTQ2NH0.Hw0oJmIuDGdITM3TZkMWeXkHy53kO4i8TCJMxb6_hko` // Replace with your actual key
                 },
                 body: JSON.stringify({ amount })
             });
@@ -129,6 +130,20 @@
             }).catch((error) => {
                 console.error('Error updating credits:', error);
             });
+        }
+
+        async function recordPayment(userId, amount, credits, paymentStatus) {
+            const { data, error } = await supabaseClient
+                .from('payments')
+                .insert([
+                    { user_id: userId, amount: amount, credits: credits, payment_status: paymentStatus }
+                ]);
+
+            if (error) {
+                console.error('Error recording payment:', error);
+            } else {
+                console.log('Payment recorded successfully:', data);
+            }
         }
     </script>
 </body>
