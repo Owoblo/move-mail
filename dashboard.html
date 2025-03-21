@@ -17,33 +17,80 @@
 </head>
 
 <body class="font-inter antialiased bg-gray-50 text-gray-900 tracking-tight">
-    <div class="flex flex-col min-h-screen overflow-hidden">
-        <header class="absolute w-full z-30">
-            <div class="max-w-6xl mx-auto px-4 sm:px-6">
-                <div class="flex items-center justify-between h-16 md:h-20">
-                    <div class="shrink-0 mr-4">
-                        <a class="inline-flex" href="index.html" aria-label="Cruip">
-                            <img src="./images/update.jpg" width="50" height="50" alt="Logo" />
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </header>
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h2 class="text-2xl font-bold mb-10">⚡ SoldAlert</h2>
+            <a href="dashboard.html" class="active mb-4 p-2">🏠 Dashboard</a>
+            <a href="payment.html" class="mb-4 p-2">💳 Buy Credits</a>
+            <a href="#" class="mb-4 p-2">📄 My Leads</a>
+            <a href="#" class="mb-4 p-2">⚙️ Settings</a>
+            <a href="index.html" class="mt-auto p-2 bg-red-600 rounded hover:bg-red-500">🚪 Logout</a>
+        </div>
 
-        <main class="relative grow flex">
-            <div class="w-full">
-                <div class="h-full flex flex-col justify-center before:min-h-[4rem] md:before:min-h-[5rem] before:flex-1 after:flex-1">
-                    <div class="px-4 sm:px-6">
-                        <div class="w-full max-w-sm mx-auto">
-                            <div class="py-16 md:py-20">
-                                <h1 class="text-4xl font-bold mb-6" id="welcomeMessage">Welcome to Your Dashboard!</h1>
-                                <div id="creditsDisplay">You have <span id="credits">0</span> credits.</div>
-                            </div>
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="section">
+                <h1 class="text-4xl font-bold mb-6">Dashboard</h1>
+                <div id="welcomeMessage" class="text-lg mb-4"></div>
+                <div class="mb-8">
+                    <h1 class="text-4xl font-bold">Welcome, John 👋</h1>
+                    <p class="mt-2 text-lg">You have <span id="credits" class="font-semibold text-green-500">15</span> Credits remaining</p>
+                </div>
+
+                <div class="bg-white shadow rounded-lg p-6 mb-10">
+                    <h2 class="text-2xl font-bold mb-4">🔍 Unlock More Listings</h2>
+                    <p class="mb-6">Buy more credits to continue accessing exclusive leads.</p>
+                    <button onclick="redirectToPayment()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-500">💰 Buy Credits</button>
+                </div>
+
+                <div class="section bg-white shadow rounded-lg p-6 mb-10">
+                    <h2 class="text-2xl font-bold mb-4">🌆 Select Your Preferred Cities</h2>
+                    <form id="city-selection-form">
+                        <label for="province-select">Select Province:</label>
+                        <select id="province-select" onchange="fetchCitiesByProvince()">
+                            <option value="">-- Select a Province --</option>
+                            <!-- Provinces will be populated here -->
+                        </select>
+                        
+                        <div id="city-checkboxes">
+                            <!-- Cities will be populated here based on selected province -->
                         </div>
+                        
+                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-500">Save Preferences</button>
+                    </form>
+                </div>
+
+                <div class="section bg-white shadow rounded-lg p-6">
+                    <h2 class="text-2xl font-bold mb-4">📄 My Leads</h2>
+                    <div class="bg-white p-6 rounded-lg shadow mt-8">
+                        <h2 class="text-xl font-bold mb-4">Leads Feed</h2>
+                        <table class="min-w-full bg-white border border-gray-300">
+                            <thead>
+                                <tr>
+                                    <th class="py-2 px-4 border-b">ID</th>
+                                    <th class="py-2 px-4 border-b">Address</th>
+                                    <th class="py-2 px-4 border-b">
+                                        Price 
+                                        <span onclick="sortTable('price', 'asc')" class="cursor-pointer">↑</span>
+                                        <span onclick="sortTable('price', 'desc')" class="cursor-pointer">↓</span>
+                                    </th>
+                                    <th class="py-2 px-4 border-b">
+                                        City 
+                                        <span onclick="sortTable('city', 'asc')" class="cursor-pointer">↑</span>
+                                        <span onclick="sortTable('city', 'desc')" class="cursor-pointer">↓</span>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="leadsContainer">
+                                <!-- Leads will be populated here -->
+                            </tbody>
+                        </table>
+                        <div id="pagination" class="mt-4 flex justify-center"></div>
                     </div>
                 </div>
             </div>
-        </main>
+        </div>
     </div>
 
     <footer class="footer">
@@ -81,22 +128,8 @@
     </div>
 
     <script>
-        const user = firebase.auth().currentUser;
-
-        if (user) {
-            const userRef = firebase.firestore().collection("users").doc(user.uid);
-            userRef.get().then((doc) => {
-                if (doc.exists) {
-                    const userData = doc.data();
-                    document.getElementById('welcomeMessage').textContent = `Welcome ${userData.company || 'User'}!`;
-                    document.getElementById('credits').textContent = userData.credits || 0;
-                }
-            }).catch((error) => {
-                console.error("Error fetching user data:", error);
-            });
-        } else {
-            // Redirect to sign-in if not authenticated
-            window.location.href = 'signin.html';
+        function redirectToPayment() {
+            window.location.href = 'payment.html'; // Redirect to payment page
         }
     </script>
 </body>
