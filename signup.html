@@ -10,6 +10,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-analytics-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
 </head>
 
 <body class="font-inter antialiased bg-gray-50 text-gray-900 tracking-tight">
@@ -61,6 +62,10 @@
                                             <input id="name" class="form-input py-2 w-full" type="text" placeholder="Corey Barker" required />
                                         </div>                                        
                                         <div>
+                                            <label class="block text-sm text-gray-700 font-medium mb-1" for="company">Company Name</label>
+                                            <input id="company" class="form-input py-2 w-full" type="text" placeholder="Your Company Name" required />
+                                        </div>
+                                        <div>
                                             <label class="block text-sm text-gray-700 font-medium mb-1" for="email">Email</label>
                                             <input id="email" class="form-input py-2 w-full" type="email" placeholder="corybarker@email.com" required />
                                         </div>
@@ -71,6 +76,10 @@
                                         <div>
                                             <label class="block text-sm text-gray-700 font-medium mb-1" for="password">Password</label>
                                             <input id="password" class="form-input py-2 w-full" type="password" autocomplete="on" placeholder="••••••••" required />
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm text-gray-700 font-medium mb-1" for="promoCode">Promo Code</label>
+                                            <input id="promoCode" class="form-input py-2 w-full" type="text" placeholder="Enter promo code" />
                                         </div>
                                         
                                     </div>
@@ -140,6 +149,7 @@
         // Initialize Firebase
         const app = firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
+        const db = firebase.firestore();
     </script>
 
     <!-- Add a div for displaying messages -->
@@ -149,26 +159,41 @@
         document.getElementById('signUpButton').addEventListener('click', signUp);
 
         function signUp() {
+            const name = document.getElementById('name').value;
+            const company = document.getElementById('company').value;
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-  
+            const phone = document.getElementById('phone').value;
+            const promoCode = document.getElementById('promoCode').value;
 
             auth.createUserWithEmailAndPassword(email, password)
                 .then((userCredential) => {
                     const user = userCredential.user;
+
                     // Store additional user details in Firestore
-                    const userRef = firebase.firestore().collection("users").doc(user.uid);
-                    userRef.set({
-                        fullName: document.getElementById('name').value,
-                        phone: document.getElementById('phone').value,
-                        email: email
-                    }).then(() => {
-                        // Redirect to sign-in page
-                        window.location.href = 'signin.html';
-                    }).catch((error) => {
-                        // Handle Firestore errors
-                        document.getElementById('message').textContent = error.message;
-                    });
+                    const userRef = db.collection("users").doc(user.uid);
+                    const userData = {
+                        fullName: name,
+                        company: company,
+                        phone: phone,
+                        email: email,
+                    };
+
+                    // Check for promo code
+                    if (promoCode === 'FREE100') {
+                        userData.credits = 100; // Add credits if promo code is valid
+                        userData.promoCodeUsed = true; // Mark promo code as used
+                    }
+
+                    userRef.set(userData)
+                        .then(() => {
+                            // Redirect to sign-in page
+                            window.location.href = 'signin.html';
+                        })
+                        .catch((error) => {
+                            // Handle Firestore errors
+                            document.getElementById('message').textContent = error.message;
+                        });
                 })
                 .catch((error) => {
                     const errorCode = error.code;
