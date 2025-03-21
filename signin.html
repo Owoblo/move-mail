@@ -97,7 +97,9 @@
                 .catch((error) => {
                     const errorCode = error.code;
                     const errorMessage = error.message;
+                    // Display error message
                     document.getElementById('message').textContent = errorMessage;
+                    console.error("Sign-in error:", errorCode, errorMessage);
                 });
         }
     </script>

@@ -193,6 +193,7 @@
                         .catch((error) => {
                             // Handle Firestore errors
                             document.getElementById('message').textContent = error.message;
+                            console.error("Firestore error:", error.message);
                         });
                 })
                 .catch((error) => {
@@ -200,6 +201,7 @@
                     const errorMessage = error.message;
                     // Display error message
                     document.getElementById('message').textContent = errorMessage;
+                    console.error("Sign-up error:", errorCode, errorMessage);
                 });
         }
     </script>
