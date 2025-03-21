@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="utf-8">
+    <title>Invite - MoveMail Pro</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link href="./css/vendors/aos.css" rel="stylesheet">
+    <link href="./style.css" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+</head>
+
+<body class="font-inter antialiased bg-gray-50 text-gray-900 tracking-tight">
+
+    <div class="flex flex-col min-h-screen overflow-hidden">
+        <header class="absolute w-full z-30">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6">
+                <div class="flex items-center justify-between h-16 md:h-20">
+                    <div class="shrink-0 mr-4">
+                        <a class="inline-flex" href="index.html" aria-label="Cruip">
+                            <img src="./images/update.jpg" width="50" height="50" alt="Logo" />
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="relative grow flex">
+            <div class="w-full max-w-md mx-auto px-4 sm:px-6">
+                <div class="py-16 md:py-20">
+                    <h1 class="text-4xl font-bold mb-6">Register with Promo Code</h1>
+                    <form id="invite-form">
+                        <div class="space-y-4">
+                            <div>
+                                <label class="block text-sm text-gray-700 font-medium mb-1" for="email">Email</label>
+                                <input id="email" class="form-input py-2 w-full" type="email" placeholder="you@example.com" required />
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-700 font-medium mb-1" for="password">Password</label>
+                                <input id="password" class="form-input py-2 w-full" type="password" placeholder="••••••••" required />
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-700 font-medium mb-1" for="promoCode">Promo Code</label>
+                                <input id="promoCode" class="form-input py-2 w-full" type="text" placeholder="Enter promo code" />
+                            </div>
+                        </div>
+                        <div class="mt-6">
+                            <button type="button" id="registerButton" class="btn text-white bg-gradient-to-t from-blue-600 to-blue-500 w-full">Register</button>
+                        </div>
+                    </form>
+                    <div id="message" class="text-red-500 mt-4"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Your Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyC3gySP9p__sdCvaWbATUqeMfGknjUJ6lk",
+            authDomain: "movemail-pro.firebaseapp.com",
+            projectId: "movemail-pro",
+            storageBucket: "movemail-pro.firebasestorage.app",
+            messagingSenderId: "690054651728",
+            appId: "1:690054651728:web:fb0ecac3bf2926dd0c9655",
+            measurementId: "G-FZZW13YK7Z"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        document.getElementById('registerButton').addEventListener('click', registerUser);
+
+        async function registerUser() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const promoCode = document.getElementById('promoCode').value;
+
+            try {
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+
+                // Check for promo code
+                if (promoCode === 'FREE100') {
+                    const userDoc = await db.collection('users').doc(user.uid).get();
+                    if (!userDoc.exists || !userDoc.data().promoCodeUsed) {
+                        // Add 100 credits to Firestore
+                        await db.collection('users').doc(user.uid).set({
+                            credits: 100,
+                            promoCodeUsed: true // Mark promo code as used
+                        }, { merge: true }); // Use merge to avoid overwriting other fields
+                    }
+                }
+
+                document.getElementById('message').textContent = 'User registered successfully!';
+                // Redirect to dashboard or another page
+                window.location.href = 'dashboard.html';
+            } catch (error) {
+                document.getElementById('message').textContent = error.message;
+            }
+        }
+    </script>
+</body>
+
+</html> 

@@ -8,14 +8,15 @@ console.log("Initializing Supabase...");
 
 // Firebase Configuration
 const firebaseConfig = {
-    apiKey: "AIzaSyC3gySP9p__sdCvaWbATUqeMfGknjUJ6lk",
-    authDomain: "movemail-pro.firebaseapp.com",
-    projectId: "movemail-pro",
-    storageBucket: "movemail-pro.firebasestorage.app",
-    messagingSenderId: "690054651728",
-    appId: "1:690054651728:web:fb0ecac3bf2926dd0c9655",
-    measurementId: "G-FZZW13YK7Z"
-};
+    apiKey: "AIzaSyAzG2eOicBvLEtNbqqdtFjnDD2HwDZqOTI",
+    authDomain: "movemail-bc958.firebaseapp.com",
+    projectId: "movemail-bc958",
+    storageBucket: "movemail-bc958.firebasestorage.app",
+    messagingSenderId: "420760181763",
+    appId: "1:420760181763:web:4e70db9d2464cce14a8236",
+    measurementId: "G-XE867G9K73"
+  };
+  
 
 
 // Initialize Firebase
