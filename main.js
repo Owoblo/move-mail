@@ -310,3 +310,34 @@ function adjustLayout() {
 // Call adjustLayout on load and resize
 window.addEventListener('load', adjustLayout);
 window.addEventListener('resize', adjustLayout);
+
+async function sortTable(column, order) {
+    console.log(`Sorting by ${column} in ${order} order...`);
+    
+    // Fetch leads again with sorting
+    const { data, error } = await supabaseClient
+        .from('sold_listings') // Replace with your table name
+        .select('*')
+        .order(column, { ascending: order === 'asc' }); // Sort based on the column and order
+
+    if (error) {
+        console.error('Error fetching sorted leads:', error);
+        return;
+    }
+
+    const leadsContainer = document.getElementById('leadsContainer');
+    leadsContainer.innerHTML = ''; // Clear existing content
+
+    data.forEach(lead => {
+        const leadCard = document.createElement('tr');
+        leadCard.innerHTML = `
+            <td class="py-2 px-4 border-b">${lead.id}</td>
+            <td class="py-2 px-4 border-b">${lead.address}</td>
+            <td class="py-2 px-4 border-b">$${lead.price}</td>
+            <td class="py-2 px-4 border-b">${lead.addressCity}</td>
+        `; // Adjust based on your table structure
+        leadsContainer.appendChild(leadCard);
+    });
+
+    updatePagination(currentPage); // Update pagination after sorting
+}

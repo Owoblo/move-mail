@@ -70,8 +70,16 @@
                                 <tr>
                                     <th class="py-2 px-4 border-b">ID</th>
                                     <th class="py-2 px-4 border-b">Address</th>
-                                    <th class="py-2 px-4 border-b">Price</th>
-                                    <th class="py-2 px-4 border-b">City</th>
+                                    <th class="py-2 px-4 border-b">
+                                        Price 
+                                        <span onclick="sortTable('price', 'asc')" class="cursor-pointer">↑</span>
+                                        <span onclick="sortTable('price', 'desc')" class="cursor-pointer">↓</span>
+                                    </th>
+                                    <th class="py-2 px-4 border-b">
+                                        City 
+                                        <span onclick="sortTable('city', 'asc')" class="cursor-pointer">↑</span>
+                                        <span onclick="sortTable('city', 'desc')" class="cursor-pointer">↓</span>
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody id="leadsContainer">
