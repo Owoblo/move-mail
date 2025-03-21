@@ -159,11 +159,8 @@
         document.getElementById('signUpButton').addEventListener('click', signUp);
 
         function signUp() {
-            const name = document.getElementById('name').value;
-            const company = document.getElementById('company').value;
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            const phone = document.getElementById('phone').value;
             const promoCode = document.getElementById('promoCode').value;
 
             // Check if the email is already in use
@@ -179,20 +176,12 @@
                             .then((userCredential) => {
                                 const user = userCredential.user;
 
-                                // Store additional user details in Firestore
+                                // Store only credits and email in Firestore
                                 const userRef = db.collection("users").doc(user.uid);
                                 const userData = {
-                                    fullName: name,
-                                    company: company,
-                                    phone: phone,
                                     email: email,
+                                    credits: promoCode === 'FREE100' ? 100 : 0 // Add credits if promo code is valid
                                 };
-
-                                // Check for promo code
-                                if (promoCode === 'FREE100') {
-                                    userData.credits = 100; // Add credits if promo code is valid
-                                    userData.promoCodeUsed = true; // Mark promo code as used
-                                }
 
                                 userRef.set(userData)
                                     .then(() => {
