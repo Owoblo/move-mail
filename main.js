@@ -8,7 +8,7 @@ console.log("Initializing Supabase...");
 
 // Check if the current URL matches the invite pattern
 if (window.location.pathname.startsWith('/invite')) {
-    window.location.href = 'signup.html'; // Redirect to the sign-up page
+    window.location.href = '/signup.html'; // Adjust the path if necessary
 }
 
 // Firebase Configuration
