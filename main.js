@@ -42,17 +42,23 @@ console.log("Supabase client initialized successfully.");
 let currentPage = 1;
 const recordsPerPage = 10;
 
-async function fetchLeads(page) {
+async function fetchLeads() {
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    loadingIndicator.style.display = 'block'; // Show loading indicator
+
     console.log("Fetching leads from Supabase...");
+
     try {
         const { data, error } = await supabaseClient
-            .from('sold_listings') // Ensure this is the correct table name
+            .from('sold_listings')
             .select('*')
-            .range((page - 1) * recordsPerPage, page * recordsPerPage - 1); // Pagination logic
+            .range((currentPage - 1) * recordsPerPage, currentPage * recordsPerPage - 1);
 
         if (error) {
             throw new Error(`Error fetching leads: ${error.message}`);
         }
+
+        console.log("Fetched leads:", data); // Log the fetched data
 
         const leadsContainer = document.getElementById('leadsContainer');
         leadsContainer.innerHTML = ''; // Clear existing content
@@ -68,40 +74,41 @@ async function fetchLeads(page) {
                 <td class="py-2 px-4 border-b">${lead.id}</td>
                 <td class="py-2 px-4 border-b">${lead.address}</td>
                 <td class="py-2 px-4 border-b">$${lead.price}</td>
-                <td class="py-2 px-4 border-b">${lead.addressCity}</td>
+                <td class="py-2 px-4 border-b">${lead.city}</td>
             `;
             leadsContainer.appendChild(leadCard);
         });
 
-        updatePagination(page);
+        updatePaginationControls(); // Call to update pagination controls
     } catch (error) {
         console.error('Error in fetchLeads:', error);
-        alert('An error occurred while fetching leads. Please try again later.');
+    } finally {
+        loadingIndicator.style.display = 'none'; // Hide loading indicator
     }
 }
 
-function updatePagination(page) {
+function updatePaginationControls() {
     const paginationContainer = document.getElementById('pagination');
     paginationContainer.innerHTML = ''; // Clear existing pagination
 
+    // Previous button
     const prevButton = document.createElement('button');
     prevButton.textContent = 'Previous';
-    prevButton.disabled = page === 1;
-    prevButton.className = 'btn pagination-btn';
+    prevButton.disabled = currentPage === 1; // Disable if on the first page
     prevButton.onclick = () => {
-        if (page > 1) {
+        if (currentPage > 1) {
             currentPage--;
-            fetchLeads(currentPage);
+            fetchLeads(); // Fetch leads for the new page
         }
     };
     paginationContainer.appendChild(prevButton);
 
+    // Next button
     const nextButton = document.createElement('button');
     nextButton.textContent = 'Next';
-    nextButton.className = 'btn pagination-btn';
     nextButton.onclick = () => {
         currentPage++;
-        fetchLeads(currentPage);
+        fetchLeads(); // Fetch leads for the new page
     };
     paginationContainer.appendChild(nextButton);
 }
@@ -118,7 +125,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('credits').textContent = credits;
 
     // Fetch leads when the page loads
-    fetchLeads(currentPage);
+    fetchLeads();
 
     // Fetch and populate provinces when the dashboard loads
     fetchProvinces();
