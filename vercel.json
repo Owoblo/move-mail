@@ -1,8 +1,9 @@
 {
+  "version": 2,
   "redirects": [
     {
       "source": "/invite*",
-      "destination": "/signup.html",
+      "destination": "signup.html",
       "permanent": true
     }
   ]
