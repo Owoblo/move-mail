@@ -27,14 +27,16 @@
             <a href="#" class="mb-4 p-2">⚙️ Settings</a>
             <a href="index.html" class="mt-auto p-2 bg-red-600 rounded hover:bg-red-500">🚪 Logout</a>
 
-            <!-- Move the Select Your Preferred Cities section here -->
+            <!-- Preferred Cities Section -->
             <div class="section bg-white shadow rounded-lg p-6 mb-10">
                 <h2 class="text-2xl font-bold mb-4">🌆 Select Your Preferred Cities</h2>
                 <form id="city-selection-form">
                     <label for="province-select">Select Province:</label>
                     <select id="province-select" onchange="fetchCitiesByProvince()">
                         <option value="">-- Select a Province --</option>
-                        <!-- Provinces will be populated here -->
+                        <option value="Province1">Province 1</option>
+                        <option value="Province2">Province 2</option>
+                        <!-- Add more provinces as needed -->
                     </select>
                     
                     <div id="city-checkboxes">
@@ -206,6 +208,71 @@
         // Call fetchLeads when the page loads
         document.addEventListener('DOMContentLoaded', () => {
             fetchLeads(); // Initial fetch
+        });
+
+        // Fetch cities based on selected province
+        function fetchCitiesByProvince() {
+            const provinceSelect = document.getElementById('province-select');
+            const selectedProvince = provinceSelect.value;
+            const cityCheckboxes = document.getElementById('city-checkboxes');
+
+            // Clear previous city checkboxes
+            cityCheckboxes.innerHTML = '';
+
+            // Example cities based on province (replace with actual data)
+            const cities = {
+                Province1: ['City1', 'City2', 'City3'],
+                Province2: ['City4', 'City5', 'City6'],
+            };
+
+            if (cities[selectedProvince]) {
+                cities[selectedProvince].forEach(city => {
+                    const checkbox = document.createElement('div');
+                    checkbox.innerHTML = `
+                        <input type="checkbox" id="${city}" name="cities" value="${city}">
+                        <label for="${city}">${city}</label>
+                    `;
+                    cityCheckboxes.appendChild(checkbox);
+                });
+            }
+        }
+
+        // Save selected cities to Firestore
+        document.getElementById('city-selection-form').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent form submission
+
+            const selectedCities = Array.from(document.querySelectorAll('input[name="cities"]:checked')).map(checkbox => checkbox.value);
+            const userId = firebase.auth().currentUser.uid; // Get current user ID
+
+            // Save selected cities to Firestore
+            const userRef = firebase.firestore().collection('users').doc(userId);
+            userRef.update({
+                preferredCities: selectedCities
+            }).then(() => {
+                alert('Preferred cities saved successfully!');
+            }).catch((error) => {
+                console.error('Error saving preferred cities:', error);
+            });
+        });
+
+        // Fetch user data on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const user = firebase.auth().currentUser;
+            if (user) {
+                const userRef = firebase.firestore().collection("users").doc(user.uid);
+                userRef.get().then((doc) => {
+                    if (doc.exists) {
+                        const userData = doc.data();
+                        document.getElementById('welcomeMessage').textContent = `Welcome, ${userData.fullName || 'User'}`;
+                        document.getElementById('credits').textContent = userData.credits || 0;
+                    }
+                }).catch((error) => {
+                    console.error("Error fetching user data:", error);
+                });
+            } else {
+                // Redirect to sign-in if not authenticated
+                window.location.href = 'signin.html';
+            }
         });
     </script>
 </body>
