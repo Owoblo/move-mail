@@ -26,6 +26,24 @@
             <a href="#" class="mb-4 p-2">📄 My Leads</a>
             <a href="#" class="mb-4 p-2">⚙️ Settings</a>
             <a href="index.html" class="mt-auto p-2 bg-red-600 rounded hover:bg-red-500">🚪 Logout</a>
+
+            <!-- Move the Select Your Preferred Cities section here -->
+            <div class="section bg-white shadow rounded-lg p-6 mb-10">
+                <h2 class="text-2xl font-bold mb-4">🌆 Select Your Preferred Cities</h2>
+                <form id="city-selection-form">
+                    <label for="province-select">Select Province:</label>
+                    <select id="province-select" onchange="fetchCitiesByProvince()">
+                        <option value="">-- Select a Province --</option>
+                        <!-- Provinces will be populated here -->
+                    </select>
+                    
+                    <div id="city-checkboxes">
+                        <!-- Cities will be populated here based on selected province -->
+                    </div>
+                    
+                    <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-500">Save Preferences</button>
+                </form>
+            </div>
         </div>
 
         <!-- Main Content -->
@@ -42,23 +60,6 @@
                     <h2 class="text-2xl font-bold mb-4">🔍 Unlock More Listings</h2>
                     <p class="mb-6">Buy more credits to continue accessing exclusive leads.</p>
                     <button onclick="redirectToPayment()" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-500">💰 Buy Credits</button>
-                </div>
-
-                <div class="section bg-white shadow rounded-lg p-6 mb-10">
-                    <h2 class="text-2xl font-bold mb-4">🌆 Select Your Preferred Cities</h2>
-                    <form id="city-selection-form">
-                        <label for="province-select">Select Province:</label>
-                        <select id="province-select" onchange="fetchCitiesByProvince()">
-                            <option value="">-- Select a Province --</option>
-                            <!-- Provinces will be populated here -->
-                        </select>
-                        
-                        <div id="city-checkboxes">
-                            <!-- Cities will be populated here based on selected province -->
-                        </div>
-                        
-                        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-500">Save Preferences</button>
-                    </form>
                 </div>
 
                 <div class="section bg-white shadow rounded-lg p-6">
