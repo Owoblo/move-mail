@@ -36,31 +36,40 @@ const recordsPerPage = 10;
 
 async function fetchLeads(page) {
     console.log("Fetching leads from Supabase...");
-    const { data, error } = await supabaseClient
-        .from('sold_listings') // Replace with your table name
-        .select('*')
-        .range((page - 1) * recordsPerPage, page * recordsPerPage - 1); // Pagination logic
+    try {
+        const { data, error } = await supabaseClient
+            .from('sold_listings') // Ensure this is the correct table name
+            .select('*')
+            .range((page - 1) * recordsPerPage, page * recordsPerPage - 1); // Pagination logic
 
-    if (error) {
-        console.error('Error fetching leads:', error);
-        return;
+        if (error) {
+            throw new Error(`Error fetching leads: ${error.message}`);
+        }
+
+        const leadsContainer = document.getElementById('leadsContainer');
+        leadsContainer.innerHTML = ''; // Clear existing content
+
+        if (data.length === 0) {
+            leadsContainer.innerHTML = '<tr><td colspan="4" class="text-center">No leads available.</td></tr>';
+            return;
+        }
+
+        data.forEach(lead => {
+            const leadCard = document.createElement('tr');
+            leadCard.innerHTML = `
+                <td class="py-2 px-4 border-b">${lead.id}</td>
+                <td class="py-2 px-4 border-b">${lead.address}</td>
+                <td class="py-2 px-4 border-b">$${lead.price}</td>
+                <td class="py-2 px-4 border-b">${lead.addressCity}</td>
+            `;
+            leadsContainer.appendChild(leadCard);
+        });
+
+        updatePagination(page);
+    } catch (error) {
+        console.error('Error in fetchLeads:', error);
+        alert('An error occurred while fetching leads. Please try again later.');
     }
-
-    const leadsContainer = document.getElementById('leadsContainer');
-    leadsContainer.innerHTML = ''; // Clear existing content
-
-    data.forEach(lead => {
-        const leadCard = document.createElement('tr');
-        leadCard.innerHTML = `
-            <td class="py-2 px-4 border-b">${lead.id}</td>
-            <td class="py-2 px-4 border-b">${lead.address}</td>
-            <td class="py-2 px-4 border-b">$${lead.price}</td>
-            <td class="py-2 px-4 border-b">${lead.addressCity}</td>
-        `; // Adjust based on your table structure
-        leadsContainer.appendChild(leadCard);
-    });
-
-    updatePagination(page);
 }
 
 function updatePagination(page) {
