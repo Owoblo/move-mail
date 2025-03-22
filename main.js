@@ -29,9 +29,12 @@ const app = firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.firestore();
 
-// Initialize Supabase
-const supabaseUrl = 'https://idbyrtwdeeruiutoukct.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlkYnlydHdkZWVydWl1dG91a2N0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzgyNTk0NjQsImV4cCI6MjA1MzgzNTQ2NH0.Hw0oJmIuDGdITM3TZkMWeXkHy53kO4i8TCJMxb6_hko';
+// Import the Supabase client
+import { createClient } from '@supabase/supabase-js';
+
+// Initialize Supabase client
+const supabaseUrl = 'https://idbyrtwdeeruiutoukct.supabase.co'; // Replace with your Supabase URL
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlkYnlydHdkZWVydWl1dG91a2N0Iiwicm9zZSI6ImFub24iLCJpYXQiOjE3MzgyNTk0NjQsImV4cCI6MjA1MzgzNTQ2NH0.Hw0oJmIuDGdITM3TZkMWeXkHy53kO4i8TCJMxb6_hko'; // Replace with your Supabase API key
 const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
 
 console.log("Supabase client initialized successfully.");
@@ -152,6 +155,10 @@ firebase.auth().onAuthStateChanged(async (user) => {
             console.log(`User ${user.email} has ${credits} credits.`);
             document.getElementById('credits').textContent = credits; // Update credits display
         }
+        fetchLeads(); // Fetch leads if the user is signed in
+    } else {
+        // Redirect to sign-in page if not authenticated
+        window.location.href = 'signin.html';
     }
 });
 
