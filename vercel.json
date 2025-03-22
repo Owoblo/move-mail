@@ -1,0 +1,9 @@
+{
+  "redirects": [
+    {
+      "source": "/invite*",
+      "destination": "/signup.html",
+      "permanent": true
+    }
+  ]
+}
