@@ -356,3 +356,60 @@ async function sortTable(column, order) {
 
     updatePagination(currentPage); // Update pagination after sorting
 }
+
+function signUp() {
+    const name = document.getElementById('name').value; // Full name
+    const company = document.getElementById('company').value; // Company name
+    const email = document.getElementById('email').value; // Email
+    const password = document.getElementById('password').value; // Password
+    const phone = document.getElementById('phone').value; // Phone number
+    const promoCode = document.getElementById('promoCode').value; // Promo code
+
+    // Check if the email is already in use
+    auth.fetchSignInMethodsForEmail(email)
+        .then((signInMethods) => {
+            if (signInMethods.length > 0) {
+                // Email is already in use, redirect to sign-in page
+                document.getElementById('message').textContent = 'This email is already in use. Please sign in.';
+                window.location.href = 'signin.html';
+            } else {
+                // Proceed with user registration
+                auth.createUserWithEmailAndPassword(email, password)
+                    .then((userCredential) => {
+                        const user = userCredential.user;
+
+                        // Store additional user details in Firestore
+                        const userRef = db.collection("users").doc(user.uid);
+                        const userData = {
+                            fullName: name,
+                            company: company,
+                            phone: phone,
+                            email: email,
+                            credits: promoCode === 'FREE100' ? 100 : 0, // Add credits if promo code is valid
+                        };
+
+                        userRef.set(userData)
+                            .then(() => {
+                                // Redirect to sign-in page
+                                window.location.href = 'signin.html';
+                            })
+                            .catch((error) => {
+                                // Handle Firestore errors
+                                document.getElementById('message').textContent = error.message;
+                                console.error("Firestore error:", error.message);
+                            });
+                    })
+                    .catch((error) => {
+                        const errorCode = error.code;
+                        const errorMessage = error.message;
+                        // Display error message
+                        document.getElementById('message').textContent = errorMessage;
+                        console.error("Sign-up error:", errorCode, errorMessage);
+                    });
+            }
+        })
+        .catch((error) => {
+            console.error("Error checking email:", error);
+            document.getElementById('message').textContent = "An error occurred while checking the email.";
+        });
+}
