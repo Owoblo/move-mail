@@ -186,13 +186,9 @@
                                     company: company,
                                     phone: phone,
                                     email: email,
+                                    credits: promoCode === 'FREE100' ? 100 : 0,
+                                    promoCodeUsed: promoCode === 'FREE100'
                                 };
-
-                                // Check for promo code
-                                if (promoCode === 'FREE100') {
-                                    userData.credits = 100; // Add credits if promo code is valid
-                                    userData.promoCodeUsed = true; // Mark promo code as used
-                                }
 
                                 userRef.set(userData)
                                     .then(() => {
