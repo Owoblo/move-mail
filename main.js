@@ -33,9 +33,7 @@ const db = firebase.firestore();
 import { createClient } from '@supabase/supabase-js';
 
 // Initialize Supabase client
-const supabaseUrl = 'https://idbyrtwdeeruiutoukct.supabase.co'; // Replace with your Supabase URL
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlkYnlydHdkZWVydWl1dG91a2N0Iiwicm9zZSI6ImFub24iLCJpYXQiOjE3MzgyNTk0NjQsImV4cCI6MjA1MzgzNTQ2NH0.Hw0oJmIuDGdITM3TZkMWeXkHy53kO4i8TCJMxb6_hko'; // Replace with your Supabase API key
-const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+const supabase = createClient(config.SUPABASE_URL, config.SUPABASE_ANON_KEY);
 
 console.log("Supabase client initialized successfully.");
 
@@ -49,7 +47,7 @@ async function fetchLeads() {
     console.log("Fetching leads from Supabase...");
 
     try {
-        const { data, error } = await supabaseClient
+        const { data, error } = await supabase
             .from('sold_listings')
             .select('*')
             .range((currentPage - 1) * recordsPerPage, currentPage * recordsPerPage - 1);
@@ -171,7 +169,7 @@ firebase.auth().onAuthStateChanged(async (user) => {
 
 async function fetchProvinces() {
     console.log('Fetching provinces...');
-    const { data, error } = await supabaseClient
+    const { data, error } = await supabase
         .from('cities')
         .select('province');
 
@@ -200,7 +198,7 @@ async function fetchCitiesByProvince() {
         return;
     }
 
-    const { data, error } = await supabaseClient
+    const { data, error } = await supabase
         .from('cities') // Ensure this is the correct table name
         .select('*')
         .eq('province', province); // Fetch cities for the selected province
@@ -245,13 +243,13 @@ document.getElementById('city-selection-form').addEventListener('submit', async 
     console.log('User ID:', userId);
 
     // Clear existing preferences for the user
-    await supabaseClient
+    await supabase
         .from('user_preferences')
         .delete()
         .eq('user_id', userId);
 
     // Insert new preferences
-    const { error } = await supabaseClient
+    const { error } = await supabase
         .from('user_preferences')
         .insert(selectedCities.map(cityId => ({ user_id: userId, city_id: cityId })));
 
@@ -264,7 +262,7 @@ document.getElementById('city-selection-form').addEventListener('submit', async 
 });
 
 async function fetchUserPreferences(userId) {
-    const { data: preferences, error } = await supabaseClient
+    const { data: preferences, error } = await supabase
         .from('user_preferences')
         .select('city_id')
         .eq('user_id', userId);
@@ -285,7 +283,7 @@ async function fetchUserPreferences(userId) {
 
 async function fetchUserListings(userId) {
     // Fetch user preferences
-    const { data: preferences, error: prefError } = await supabaseClient
+    const { data: preferences, error: prefError } = await supabase
         .from('user_preferences')
         .select('city_id') // Assuming city_id corresponds to city names
         .eq('user_id', userId);
@@ -299,7 +297,7 @@ async function fetchUserListings(userId) {
     const cityNames = preferences.map(pref => pref.city_id); // Get city names from preferences
     
     // Fetch listings based on selected cities
-    const { data: listings, error: listingError } = await supabaseClient
+    const { data: listings, error: listingError } = await supabase
         .from('sold_listings') // Replace with your actual listings table name
         .select('*')
         .in('city', cityNames); // Use the city field in listings
@@ -344,7 +342,7 @@ async function sortTable(column, order) {
     console.log(`Sorting by ${column} in ${order} order...`);
     
     // Fetch leads again with sorting
-    const { data, error } = await supabaseClient
+    const { data, error } = await supabase
         .from('sold_listings') // Replace with your table name
         .select('*')
         .order(column, { ascending: order === 'asc' }); // Sort based on the column and order
