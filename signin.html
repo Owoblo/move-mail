@@ -7,25 +7,8 @@
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <link href="./css/vendors/aos.css" rel="stylesheet">
     <link href="./style.css" rel="stylesheet">
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-analytics-compat.js"></script>
-    <script>
-        // Your web app's Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyAzG2eOicBvLEtNbqqdtFjnDD2HwDZqOTI",
-            authDomain: "movemail-bc958.firebaseapp.com",
-            projectId: "movemail-bc958",
-            storageBucket: "movemail-bc958.firebasestorage.app",
-            messagingSenderId: "420760181763",
-            appId: "1:420760181763:web:4e70db9d2464cce14a8236",
-            measurementId: "G-XE867G9K73"
-        };
-
-        // Initialize Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-    </script>
+    <script src="config.js"></script>
+    <script src="main.js"></script>
 </head>
 
 <body class="font-inter antialiased bg-gray-50 text-gray-900 tracking-tight">
@@ -81,28 +64,6 @@
             </div>
         </main>
     </div>
-
-    <script>
-        document.getElementById('signInButton').addEventListener('click', signIn);
-
-        function signIn() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-
-            auth.signInWithEmailAndPassword(email, password)
-                .then((userCredential) => {
-                    // Redirect to dashboard
-                    window.location.href = 'dashboard.html';
-                })
-                .catch((error) => {
-                    const errorCode = error.code;
-                    const errorMessage = error.message;
-                    // Display error message
-                    document.getElementById('message').textContent = errorMessage;
-                    console.error("Sign-in error:", errorCode, errorMessage);
-                });
-        }
-    </script>
 
 </body>
 

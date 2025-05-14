@@ -11,24 +11,6 @@ if (window.location.pathname.startsWith('/invite')) {
     window.location.href = '/signup.html'; // Adjust the path if necessary
 }
 
-// Firebase Configuration
-const firebaseConfig = {
-    apiKey: "AIzaSyAzG2eOicBvLEtNbqqdtFjnDD2HwDZqOTI",
-    authDomain: "movemail-bc958.firebaseapp.com",
-    projectId: "movemail-bc958",
-    storageBucket: "movemail-bc958.firebasestorage.app",
-    messagingSenderId: "420760181763",
-    appId: "1:420760181763:web:4e70db9d2464cce14a8236",
-    measurementId: "G-XE867G9K73"
-  };
-  
-
-
-// Initialize Firebase
-const app = firebase.initializeApp(firebaseConfig);
-const auth = firebase.auth();
-const db = firebase.firestore();
-
 // Import the Supabase client
 import { createClient } from '@supabase/supabase-js';
 
@@ -136,35 +118,6 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
     fetchUserPreferences(userId); // Fetch user preferences
-});
-
-// Firebase Auth State Change Listener
-firebase.auth().onAuthStateChanged(async (user) => {
-    if (user) {
-        const userRef = firebase.firestore().collection("users").doc(user.uid);
-
-        // Check if the user already exists
-        const doc = await userRef.get();
-        if (!doc.exists) {
-            // If not, create a new entry with 0 credits
-            await userRef.set({
-                email: user.email,
-                credits: 0,
-            });
-            console.log(`User ${user.email} created with 0 credits.`);
-            document.getElementById('credits').textContent = '0'; // Update credits display
-        } else {
-            // Fetch user data
-            const userData = doc.data();
-            const credits = userData.credits || 0; // Default to 0 if credits is undefined
-            console.log(`User ${user.email} has ${credits} credits.`);
-            document.getElementById('credits').textContent = credits; // Update credits display
-        }
-        fetchLeads(); // Fetch leads if the user is signed in
-    } else {
-        // Redirect to sign-in page if not authenticated
-        window.location.href = 'signin.html';
-    }
 });
 
 async function fetchProvinces() {
@@ -369,59 +322,75 @@ async function sortTable(column, order) {
     updatePagination(currentPage); // Update pagination after sorting
 }
 
-function signUp() {
-    const name = document.getElementById('name').value; // Full name
-    const company = document.getElementById('company').value; // Company name
-    const email = document.getElementById('email').value; // Email
-    const password = document.getElementById('password').value; // Password
-    const phone = document.getElementById('phone').value; // Phone number
-    const promoCode = document.getElementById('promoCode').value; // Promo code
+// Supabase Sign Up Logic
+if (document.getElementById('signUpButton')) {
+    document.getElementById('signUpButton').addEventListener('click', async function () {
+        const name = document.getElementById('name').value;
+        const company = document.getElementById('company').value;
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const phone = document.getElementById('phone').value;
+        const promoCode = document.getElementById('promoCode').value;
+        const messageDiv = document.getElementById('message');
+        messageDiv.textContent = '';
 
-    // Check if the email is already in use
-    auth.fetchSignInMethodsForEmail(email)
-        .then((signInMethods) => {
-            if (signInMethods.length > 0) {
-                // Email is already in use, redirect to sign-in page
-                document.getElementById('message').textContent = 'This email is already in use. Please sign in.';
-                window.location.href = 'signin.html';
-            } else {
-                // Proceed with user registration
-                auth.createUserWithEmailAndPassword(email, password)
-                    .then((userCredential) => {
-                        const user = userCredential.user;
-
-                        // Store additional user details in Firestore
-                        const userRef = db.collection("users").doc(user.uid);
-                        const userData = {
-                            fullName: name,
-                            company: company,
-                            phone: phone,
-                            email: email,
-                            credits: promoCode === 'FREE100' ? 100 : 0, // Add credits if promo code is valid
-                        };
-
-                        userRef.set(userData)
-                            .then(() => {
-                                // Redirect to sign-in page
-                                window.location.href = 'signin.html';
-                            })
-                            .catch((error) => {
-                                // Handle Firestore errors
-                                document.getElementById('message').textContent = error.message;
-                                console.error("Firestore error:", error.message);
-                            });
-                    })
-                    .catch((error) => {
-                        const errorCode = error.code;
-                        const errorMessage = error.message;
-                        // Display error message
-                        document.getElementById('message').textContent = errorMessage;
-                        console.error("Sign-up error:", errorCode, errorMessage);
-                    });
-            }
-        })
-        .catch((error) => {
-            console.error("Error checking email:", error);
-            document.getElementById('message').textContent = "An error occurred while checking the email.";
+        // Register user with Supabase Auth
+        const { user, error: signUpError } = await supabase.auth.signUp({
+            email,
+            password
         });
+        if (signUpError) {
+            messageDiv.textContent = signUpError.message;
+            return;
+        }
+        // Insert extra info into moving_companies table
+        const credits = promoCode === 'FREE100' ? 100 : 0;
+        const { error: insertError } = await supabase.from('moving_companies').insert([
+            {
+                id: user.id,
+                full_name: name,
+                company: company,
+                email: email,
+                phone: phone,
+                credits: credits,
+                promo_code_used: promoCode === 'FREE100'
+            }
+        ]);
+        if (insertError) {
+            messageDiv.textContent = insertError.message;
+            return;
+        }
+        // Redirect to sign-in page
+        window.location.href = 'signin.html';
+    });
+}
+
+// Supabase Sign In Logic
+if (document.getElementById('signInButton')) {
+    document.getElementById('signInButton').addEventListener('click', async function () {
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const messageDiv = document.getElementById('message');
+        messageDiv.textContent = '';
+
+        const { user, error: signInError } = await supabase.auth.signInWithPassword({
+            email,
+            password
+        });
+        if (signInError) {
+            messageDiv.textContent = signInError.message;
+            return;
+        }
+        // Store user info in sessionStorage for dashboard use
+        sessionStorage.setItem('userId', user.id);
+        sessionStorage.setItem('userEmail', user.email);
+        // Optionally fetch company name and credits for dashboard
+        const { data, error: fetchError } = await supabase.from('moving_companies').select('*').eq('id', user.id).single();
+        if (!fetchError && data) {
+            sessionStorage.setItem('userName', data.company);
+            sessionStorage.setItem('credits', data.credits);
+        }
+        // Redirect to dashboard
+        window.location.href = 'dashboard.html';
+    });
 }
