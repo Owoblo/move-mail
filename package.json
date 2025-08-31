@@ -1,13 +1,14 @@
 {
-  "name": "simple-html",
-  "description": "Simple HTML template - Cruip.com",
+  "name": "movemail-pro",
+  "description": "Professional platform for moving companies to access leads and grow their business",
   "version": "1.0.0",
-  "homepage": "https://cruip.com",
-  "author": "Pasquale Vitiello",
-  "license": "https://cruip.com/terms/",
+  "homepage": "https://movemailpro.com",
+  "author": "MoveMail Pro Team",
+  "license": "MIT",
   "scripts": {
     "dev": "npx tailwindcss -i ./css/style.css -o ./style.css --watch",
-    "build": "npx tailwindcss -i ./css/style.css -o ./style.css"
+    "build": "npx tailwindcss -i ./css/style.css -o ./style.css",
+    "start": "node server.js"
   },
   "devDependencies": {
     "@tailwindcss/forms": "^0.5.7",
@@ -15,9 +16,13 @@
   },
   "dependencies": {
     "@tailwindcss/typography": "^0.5.13",
-    "auth": "^1.2.3",
+    "@supabase/supabase-js": "^2.39.0",
+    "cors": "^2.8.5",
     "dotenv": "^16.4.7",
-    "firebase": "^11.2.0",
+    "express": "^4.18.2",
     "stripe": "^17.7.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

@@ -1,1 +1,485 @@
- 
+<!doctype html>
+<html lang="en" class="scroll-smooth">
+
+<head>
+    <meta charset="utf-8">
+    <title>My Leads - MoveMail Pro</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link href="./css/vendors/aos.css" rel="stylesheet">
+    <link href="./style.css" rel="stylesheet">
+    <link href="./style1.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <script src="https://js.stripe.com/v3/"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.1/dist/aos.js"></script>
+    <script src="./js/main.js" defer></script>
+</head>
+
+<body class="font-inter antialiased bg-gray-50 text-gray-900 tracking-tight">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h2 class="text-2xl font-bold mb-10">⚡ SoldAlert</h2>
+            <a href="dashboard.html" class="mb-4 p-2">🏠 Dashboard</a>
+            <a href="payment.html" class="mb-4 p-2">💳 Buy Credits</a>
+            <a href="leads.html" class="active mb-4 p-2">📄 My Leads</a>
+            <a href="#" class="mb-4 p-2">⚙️ Settings</a>
+            <a href="index.html" class="mt-auto p-2 bg-red-600 rounded hover:bg-red-500">🚪 Logout</a>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="section">
+                <div class="flex justify-between items-center mb-6">
+                    <h1 class="text-4xl font-bold">📄 My Leads</h1>
+                    <div class="flex items-center gap-4">
+                        <span class="text-lg">Credits: <span id="creditsDisplay" class="font-semibold text-green-500">0</span></span>
+                        <button onclick="window.location.href='payment.html'" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-500">
+                            💰 Buy Credits
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Filters Section -->
+                <div class="bg-white shadow rounded-lg p-6 mb-6">
+                    <h2 class="text-xl font-bold mb-4">🔍 Filter Leads</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">City</label>
+                            <input type="text" id="cityFilter" placeholder="Enter city name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Price Range</label>
+                            <select id="priceFilter" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">All Prices</option>
+                                <option value="0-200000">$0 - $200k</option>
+                                <option value="200000-500000">$200k - $500k</option>
+                                <option value="500000-1000000">$500k - $1M</option>
+                                <option value="1000000+">$1M+</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Property Type</label>
+                            <select id="propertyTypeFilter" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">All Types</option>
+                                <option value="house">House</option>
+                                <option value="apartment">Apartment</option>
+                                <option value="condo">Condo</option>
+                                <option value="townhouse">Townhouse</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                            <select id="statusFilter" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                <option value="">All Statuses</option>
+                                <option value="new">New</option>
+                                <option value="contacted">Contacted</option>
+                                <option value="quoted">Quoted</option>
+                                <option value="booked">Booked</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="flex gap-2 mt-4">
+                        <button onclick="applyFilters()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-500">
+                            🔍 Apply Filters
+                        </button>
+                        <button onclick="clearFilters()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-400">
+                            🗑️ Clear Filters
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Leads Table -->
+                <div class="bg-white shadow rounded-lg p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-bold">📋 Leads List</h2>
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm text-gray-600">Showing <span id="leadsCount">0</span> leads</span>
+                            <select id="sortBy" onchange="sortLeads()" class="px-3 py-1 border border-gray-300 rounded text-sm">
+                                <option value="created_at">Date Added</option>
+                                <option value="price">Price</option>
+                                <option value="city">City</option>
+                                <option value="address">Address</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full bg-white border border-gray-300">
+                            <thead>
+                                <tr class="bg-gray-50">
+                                    <th class="py-3 px-4 border-b text-left font-semibold">ID</th>
+                                    <th class="py-3 px-4 border-b text-left font-semibold">Address</th>
+                                    <th class="py-3 px-4 border-b text-left font-semibold">City</th>
+                                    <th class="py-3 px-4 border-b text-left font-semibold">Price</th>
+                                    <th class="py-3 px-4 border-b text-left font-semibold">Type</th>
+                                    <th class="py-3 px-4 border-b text-left font-semibold">Status</th>
+                                    <th class="py-3 px-4 border-b text-left font-semibold">Date Added</th>
+                                    <th class="py-3 px-4 border-b text-left font-semibold">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leadsTableBody">
+                                <!-- Leads will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    <div id="pagination" class="mt-6 flex justify-center items-center gap-2">
+                        <!-- Pagination will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Lead Details Modal -->
+                <div id="leadModal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+                    <div class="flex items-center justify-center min-h-screen p-4">
+                        <div class="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                            <div class="p-6">
+                                <div class="flex justify-between items-center mb-4">
+                                    <h3 class="text-xl font-bold">Lead Details</h3>
+                                    <button onclick="closeLeadModal()" class="text-gray-500 hover:text-gray-700 text-2xl">&times;</button>
+                                </div>
+                                <div id="leadModalContent">
+                                    <!-- Lead details will be populated here -->
+                                </div>
+                                <div class="flex gap-2 mt-6">
+                                    <button onclick="updateLeadStatus()" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-500">
+                                        Update Status
+                                    </button>
+                                    <button onclick="closeLeadModal()" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-400">
+                                        Close
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Message Display -->
+    <div id="message" class="fixed top-4 right-4 z-50"></div>
+
+    <script>
+        // Leads-specific JavaScript
+        let currentLeads = [];
+        let filteredLeads = [];
+        let currentPage = 1;
+        const leadsPerPage = 10;
+
+        // Load leads when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            loadLeads();
+            updateCreditsDisplay();
+        });
+
+        // Load leads from Supabase
+        async function loadLeads() {
+            if (!window.supabaseClient || !window.currentUser) {
+                showMessage('Please sign in to view leads', 'error');
+                return;
+            }
+
+            try {
+                const { data: leads, error } = await window.supabaseClient
+                    .from('leads')
+                    .select('*')
+                    .eq('company_id', window.currentUser.id)
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                currentLeads = leads || [];
+                filteredLeads = [...currentLeads];
+                displayLeads();
+                updateLeadsCount();
+            } catch (error) {
+                console.error('Error loading leads:', error);
+                showMessage('Failed to load leads', 'error');
+            }
+        }
+
+        // Display leads in table
+        function displayLeads() {
+            const tbody = document.getElementById('leadsTableBody');
+            if (!tbody) return;
+
+            const startIndex = (currentPage - 1) * leadsPerPage;
+            const endIndex = startIndex + leadsPerPage;
+            const pageLeads = filteredLeads.slice(startIndex, endIndex);
+
+            if (pageLeads.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="text-center py-8 text-gray-500">No leads found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = pageLeads.map(lead => `
+                <tr class="hover:bg-gray-50 border-b">
+                    <td class="py-3 px-4">${lead.id.substring(0, 8)}...</td>
+                    <td class="py-3 px-4">${lead.address || 'N/A'}</td>
+                    <td class="py-3 px-4">${lead.city || 'N/A'}</td>
+                    <td class="py-3 px-4">${lead.price ? `$${lead.price.toLocaleString()}` : 'N/A'}</td>
+                    <td class="py-3 px-4">${lead.property_type || 'N/A'}</td>
+                    <td class="py-3 px-4">
+                        <span class="px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(lead.lead_status)}">
+                            ${lead.lead_status || 'new'}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4">${new Date(lead.created_at).toLocaleDateString()}</td>
+                    <td class="py-3 px-4">
+                        <button onclick="viewLeadDetails('${lead.id}')" class="text-blue-600 hover:text-blue-800 mr-2">
+                            👁️ View
+                        </button>
+                        <button onclick="updateLeadStatus('${lead.id}')" class="text-green-600 hover:text-green-800">
+                            ✏️ Edit
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+
+            updatePagination();
+        }
+
+        // Get status color class
+        function getStatusColor(status) {
+            const colors = {
+                'new': 'bg-blue-100 text-blue-800',
+                'contacted': 'bg-yellow-100 text-yellow-800',
+                'quoted': 'bg-purple-100 text-purple-800',
+                'booked': 'bg-green-100 text-green-800',
+                'completed': 'bg-gray-100 text-gray-800'
+            };
+            return colors[status] || 'bg-gray-100 text-gray-800';
+        }
+
+        // Apply filters
+        function applyFilters() {
+            const cityFilter = document.getElementById('cityFilter').value.toLowerCase();
+            const priceFilter = document.getElementById('priceFilter').value;
+            const propertyTypeFilter = document.getElementById('propertyTypeFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+
+            filteredLeads = currentLeads.filter(lead => {
+                const cityMatch = !cityFilter || (lead.city && lead.city.toLowerCase().includes(cityFilter));
+                const propertyTypeMatch = !propertyTypeFilter || lead.property_type === propertyTypeFilter;
+                const statusMatch = !statusFilter || lead.lead_status === statusFilter;
+
+                let priceMatch = true;
+                if (priceFilter && lead.price) {
+                    const [min, max] = priceFilter.split('-').map(p => p === '+' ? Infinity : parseInt(p));
+                    priceMatch = lead.price >= min && (max === Infinity ? true : lead.price <= max);
+                }
+
+                return cityMatch && priceMatch && propertyTypeMatch && statusMatch;
+            });
+
+            currentPage = 1;
+            displayLeads();
+            updateLeadsCount();
+        }
+
+        // Clear filters
+        function clearFilters() {
+            document.getElementById('cityFilter').value = '';
+            document.getElementById('priceFilter').value = '';
+            document.getElementById('propertyTypeFilter').value = '';
+            document.getElementById('statusFilter').value = '';
+            
+            filteredLeads = [...currentLeads];
+            currentPage = 1;
+            displayLeads();
+            updateLeadsCount();
+        }
+
+        // Sort leads
+        function sortLeads() {
+            const sortBy = document.getElementById('sortBy').value;
+            
+            filteredLeads.sort((a, b) => {
+                switch (sortBy) {
+                    case 'price':
+                        return (a.price || 0) - (b.price || 0);
+                    case 'city':
+                        return (a.city || '').localeCompare(b.city || '');
+                    case 'address':
+                        return (a.address || '').localeCompare(b.address || '');
+                    default:
+                        return new Date(b.created_at) - new Date(a.created_at);
+                }
+            });
+
+            displayLeads();
+        }
+
+        // Update pagination
+        function updatePagination() {
+            const pagination = document.getElementById('pagination');
+            if (!pagination) return;
+
+            const totalPages = Math.ceil(filteredLeads.length / leadsPerPage);
+            
+            if (totalPages <= 1) {
+                pagination.innerHTML = '';
+                return;
+            }
+
+            let paginationHTML = '';
+            
+            // Previous button
+            if (currentPage > 1) {
+                paginationHTML += `<button onclick="changePage(${currentPage - 1})" class="px-3 py-2 border rounded hover:bg-gray-50">← Previous</button>`;
+            }
+
+            // Page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === currentPage) {
+                    paginationHTML += `<span class="px-3 py-2 bg-blue-600 text-white rounded">${i}</span>`;
+                } else if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+                    paginationHTML += `<button onclick="changePage(${i})" class="px-3 py-2 border rounded hover:bg-gray-50">${i}</button>`;
+                } else if (i === currentPage - 3 || i === currentPage + 3) {
+                    paginationHTML += `<span class="px-3 py-2">...</span>`;
+                }
+            }
+
+            // Next button
+            if (currentPage < totalPages) {
+                paginationHTML += `<button onclick="changePage(${currentPage + 1})" class="px-3 py-2 border rounded hover:bg-gray-50">Next →</button>`;
+            }
+
+            pagination.innerHTML = paginationHTML;
+        }
+
+        // Change page
+        function changePage(page) {
+            currentPage = page;
+            displayLeads();
+        }
+
+        // Update leads count
+        function updateLeadsCount() {
+            const countElement = document.getElementById('leadsCount');
+            if (countElement) {
+                countElement.textContent = filteredLeads.length;
+            }
+        }
+
+        // Update credits display
+        function updateCreditsDisplay() {
+            if (window.currentUser && window.currentUser.profile) {
+                const creditsElement = document.getElementById('creditsDisplay');
+                if (creditsElement) {
+                    creditsElement.textContent = window.currentUser.profile.credits || 0;
+                }
+            }
+        }
+
+        // View lead details
+        function viewLeadDetails(leadId) {
+            const lead = currentLeads.find(l => l.id === leadId);
+            if (!lead) return;
+
+            const modal = document.getElementById('leadModal');
+            const content = document.getElementById('leadModalContent');
+
+            content.innerHTML = `
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Address:</label>
+                        <p class="text-gray-900">${lead.address || 'N/A'}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">City:</label>
+                        <p class="text-gray-900">${lead.city || 'N/A'}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Price:</label>
+                        <p class="text-gray-900">${lead.price ? `$${lead.price.toLocaleString()}` : 'N/A'}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Property Type:</label>
+                        <p class="text-gray-900">${lead.property_type || 'N/A'}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Bedrooms:</label>
+                        <p class="text-gray-900">${lead.bedrooms || 'N/A'}</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700">Bathrooms:</label>
+                        <p class="text-gray-900">${lead.bathrooms || 'N/A'}</p>
+                    </div>
+                    <div class="col-span-2">
+                        <label class="block text-sm font-medium text-gray-700">Notes:</label>
+                        <p class="text-gray-900">${lead.notes || 'No notes available'}</p>
+                    </div>
+                </div>
+            `;
+
+            modal.classList.remove('hidden');
+        }
+
+        // Close lead modal
+        function closeLeadModal() {
+            const modal = document.getElementById('leadModal');
+            modal.classList.add('hidden');
+        }
+
+        // Update lead status
+        function updateLeadStatus(leadId) {
+            const lead = currentLeads.find(l => l.id === leadId);
+            if (!lead) return;
+
+            const newStatus = prompt('Enter new status (new, contacted, quoted, booked, completed):', lead.lead_status || 'new');
+            
+            if (newStatus && newStatus !== lead.lead_status) {
+                updateLeadInDatabase(leadId, { lead_status: newStatus });
+            }
+        }
+
+        // Update lead in database
+        async function updateLeadInDatabase(leadId, updates) {
+            if (!window.supabaseClient) return;
+
+            try {
+                const { error } = await window.supabaseClient
+                    .from('leads')
+                    .update(updates)
+                    .eq('id', leadId);
+
+                if (error) throw error;
+
+                showMessage('Lead updated successfully', 'success');
+                loadLeads(); // Reload leads
+                closeLeadModal();
+            } catch (error) {
+                console.error('Error updating lead:', error);
+                showMessage('Failed to update lead', 'error');
+            }
+        }
+
+        // Show message
+        function showMessage(message, type = 'info') {
+            const messageDiv = document.getElementById('message');
+            if (!messageDiv) return;
+
+            messageDiv.textContent = message;
+            messageDiv.className = `px-4 py-2 rounded-lg shadow-lg ${
+                type === 'error' ? 'bg-red-500 text-white' :
+                type === 'success' ? 'bg-green-500 text-white' :
+                type === 'warning' ? 'bg-yellow-500 text-white' :
+                'bg-blue-500 text-white'
+            }`;
+
+            setTimeout(() => {
+                messageDiv.textContent = '';
+                messageDiv.className = '';
+            }, 5000);
+        }
+    </script>
+</body>
+
+</html> 

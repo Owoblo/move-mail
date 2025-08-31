@@ -3,140 +3,370 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Payment - MoveMail Pro</title>
+    <title>Buy Credits - MoveMail Pro</title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <link href="./css/vendors/aos.css" rel="stylesheet">
     <link href="./style.css" rel="stylesheet">
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-firestore-compat.js"></script>
+    <link href="./style1.css" rel="stylesheet">
     <script src="https://js.stripe.com/v3/"></script>
-    <script>
-        // Your web app's Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyC3gySP9p__sdCvaWbATUqeMfGknjUJ6lk",
-            authDomain: "movemail-pro.firebaseapp.com",
-            projectId: "movemail-pro",
-            storageBucket: "movemail-pro.firebasestorage.app",
-            messagingSenderId: "690054651728",
-            appId: "1:690054651728:web:fb0ecac3bf2926dd0c9655",
-            measurementId: "G-FZZW13YK7Z"
-        };
-
-        // Initialize Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <script src="./js/main.js" defer></script>
 </head>
 
 <body class="font-inter antialiased bg-gray-50 text-gray-900 tracking-tight">
+    <div class="flex h-screen">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h2 class="text-2xl font-bold mb-10">⚡ SoldAlert</h2>
+            <a href="dashboard.html" class="mb-4 p-2">🏠 Dashboard</a>
+            <a href="payment.html" class="active mb-4 p-2">💳 Buy Credits</a>
+            <a href="leads.html" class="mb-4 p-2">📄 My Leads</a>
+            <a href="#" class="mb-4 p-2">⚙️ Settings</a>
+            <a href="index.html" class="mt-auto p-2 bg-red-600 rounded hover:bg-red-500">🚪 Logout</a>
+        </div>
 
-    <!-- Page wrapper -->
-    <div class="flex flex-col min-h-screen overflow-hidden supports-[overflow:clip]:overflow-clip">
-        
-        <!-- Site header -->
-        <header class="absolute w-full z-30">
-            <div class="max-w-6xl mx-auto px-4 sm:px-6">
-                <div class="flex items-center justify-between h-16 md:h-20">
-                    <!-- Site branding -->
-                    <div class="shrink-0 mr-4">
-                        <!-- Logo -->
-                        <a class="inline-flex" href="index.html" aria-label="Cruip">
-                            <img src="./images/update.jpg" width="50" height="50" alt="Logo" />
-                        </a>
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="section">
+                <div class="mb-6">
+                    <h1 class="text-4xl font-bold">💳 Buy Credits</h1>
+                    <p class="text-lg text-gray-600 mt-2">Purchase credits to access exclusive moving leads and grow your business</p>
+                </div>
+
+                <!-- Current Credits Display -->
+                <div class="bg-white shadow rounded-lg p-6 mb-8">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold text-gray-900">Current Balance</h2>
+                            <p class="text-gray-600">Available credits for accessing leads</p>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-4xl font-bold text-green-600" id="currentCredits">0</div>
+                            <div class="text-sm text-gray-500">Credits</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Credit Packages -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <!-- Starter Package -->
+                    <div class="bg-white shadow rounded-lg p-6 border-2 border-gray-200 hover:border-blue-500 transition-colors">
+                        <div class="text-center">
+                            <h3 class="text-xl font-bold text-gray-900 mb-2">🚀 Starter</h3>
+                            <div class="text-3xl font-bold text-blue-600 mb-2">$99</div>
+                            <div class="text-lg text-gray-600 mb-4">250 Credits</div>
+                            <ul class="text-sm text-gray-600 mb-6 space-y-2">
+                                <li>✓ Access to 250 leads</li>
+                                <li>✓ Basic filtering</li>
+                                <li>✓ Email support</li>
+                            </ul>
+                            <button onclick="selectPackage('starter', 99, 250)" class="w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors">
+                                Select Package
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Professional Package -->
+                    <div class="bg-white shadow rounded-lg p-6 border-2 border-blue-500 relative">
+                        <div class="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                            <span class="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-medium">Most Popular</span>
+                        </div>
+                        <div class="text-center">
+                            <h3 class="text-xl font-bold text-gray-900 mb-2">💼 Professional</h3>
+                            <div class="text-3xl font-bold text-blue-600 mb-2">$299</div>
+                            <div class="text-lg text-gray-600 mb-4">1,000 Credits</div>
+                            <ul class="text-sm text-gray-600 mb-6 space-y-2">
+                                <li>✓ Access to 1,000 leads</li>
+                                <li>✓ Advanced filtering</li>
+                                <li>✓ Priority support</li>
+                                <li>✓ 20% savings</li>
+                            </ul>
+                            <button onclick="selectPackage('professional', 299, 1000)" class="w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors">
+                                Select Package
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Enterprise Package -->
+                    <div class="bg-white shadow rounded-lg p-6 border-2 border-gray-200 hover:border-blue-500 transition-colors">
+                        <div class="text-center">
+                            <h3 class="text-xl font-bold text-gray-900 mb-2">🏢 Enterprise</h3>
+                            <div class="text-3xl font-bold text-blue-600 mb-2">$999</div>
+                            <div class="text-lg text-gray-600 mb-4">5,000 Credits</div>
+                            <ul class="text-sm text-gray-600 mb-6 space-y-2">
+                                <li>✓ Access to 5,000 leads</li>
+                                <li>✓ Premium filtering</li>
+                                <li>✓ Dedicated support</li>
+                                <li>✓ 33% savings</li>
+                            </ul>
+                            <button onclick="selectPackage('enterprise', 999, 5000)" class="w-full bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 transition-colors">
+                                Select Package
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Form -->
+                <div id="paymentForm" class="bg-white shadow rounded-lg p-6 hidden">
+                    <h2 class="text-2xl font-bold mb-6">Payment Details</h2>
+                    
+                    <div class="mb-6">
+                        <div class="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
+                            <div>
+                                <span class="font-medium">Selected Package:</span>
+                                <span id="selectedPackageName" class="ml-2"></span>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-lg font-bold" id="selectedPackagePrice"></div>
+                                <div class="text-sm text-gray-600" id="selectedPackageCredits"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <form id="stripeForm">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Card Number</label>
+                                <div id="card-element" class="p-3 border border-gray-300 rounded-md"></div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Cardholder Name</label>
+                                <input type="text" id="cardholder-name" placeholder="John Doe" class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                        </div>
+
+                        <div class="mb-6">
+                            <button type="submit" id="submit-button" class="w-full bg-green-600 text-white py-3 px-6 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                                <span id="button-text">Pay Now</span>
+                                <span id="spinner" class="hidden">Processing...</span>
+                            </button>
+                        </div>
+                    </form>
+
+                    <div id="payment-message" class="mt-4 p-4 rounded-lg hidden"></div>
+                </div>
+
+                <!-- FAQ Section -->
+                <div class="bg-white shadow rounded-lg p-6 mt-8">
+                    <h2 class="text-2xl font-bold mb-6">Frequently Asked Questions</h2>
+                    <div class="space-y-4">
+                        <div>
+                            <h3 class="font-semibold text-gray-900">How do credits work?</h3>
+                            <p class="text-gray-600">Each lead you access costs 1 credit. Credits never expire and can be used anytime.</p>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900">Can I get a refund?</h3>
+                            <p class="text-gray-600">We offer a 30-day money-back guarantee if you're not satisfied with our service.</p>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900">What payment methods do you accept?</h3>
+                            <p class="text-gray-600">We accept all major credit cards including Visa, Mastercard, and American Express.</p>
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-gray-900">Is my payment secure?</h3>
+                            <p class="text-gray-600">Yes, we use Stripe for secure payment processing and never store your card details.</p>
+                        </div>
                     </div>
                 </div>
             </div>
-        </header>
-
-        <main class="relative grow flex">
-            <!-- Content -->
-            <div class="w-full max-w-6xl mx-auto px-4 sm:px-6">
-                <div class="py-16 md:py-20">
-                    <h1 class="text-4xl font-bold mb-6">Add Funds</h1>
-                    <div class="mb-4">
-                        <button id="package-1" class="btn mt-4 bg-blue-500 text-white w-full" onclick="buyCredits(100, 250)">Buy 250 Credits - $100</button>
-                        <button id="package-2" class="btn mt-4 bg-blue-500 text-white w-full" onclick="buyCredits(500, 2000)">Buy 2000 Credits - $500</button>
-                        <button id="package-3" class="btn mt-4 bg-blue-500 text-white w-full" onclick="buyCredits(2000, 'unlimited')">Buy Unlimited Credits - $2000</button>
-                    </div>
-                    <div id="payment-message" class="mt-4 text-red-500"></div>
-                </div>
-            </div>
-        </main>
+        </div>
     </div>
 
     <script>
-        const stripe = Stripe('pk_live_51O7k34CUfCzyitr0zsOHHPpYKBs5fWd0xZl4d5ybCLx85oFigGSqbDHBvHJZN7icxOYU3hpwy8ZLaPl91Mj6DjRQ009TyjV9WX');
-        const elements = stripe.elements();
-        const cardElement = elements.create('card');
-        cardElement.mount('#card-element');
+        let stripe;
+        let elements;
+        let cardElement;
+        let selectedPackage = null;
 
-        async function buyCredits(amount, credits) {
+        // Initialize Stripe when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeStripe();
+            updateCreditsDisplay();
+        });
+
+        function initializeStripe() {
+            // Initialize Stripe with your publishable key
+            stripe = Stripe('YOUR_STRIPE_PUBLISHABLE_KEY'); // Replace with your actual key
+            elements = stripe.elements();
+            
+            // Create card element
+            cardElement = elements.create('card', {
+                style: {
+                    base: {
+                        fontSize: '16px',
+                        color: '#424770',
+                        '::placeholder': {
+                            color: '#aab7c4',
+                        },
+                    },
+                },
+            });
+            
+            cardElement.mount('#card-element');
+        }
+
+        function selectPackage(packageType, price, credits) {
+            selectedPackage = { type: packageType, price, credits };
+            
+            // Update display
+            document.getElementById('selectedPackageName').textContent = packageType.charAt(0).toUpperCase() + packageType.slice(1);
+            document.getElementById('selectedPackagePrice').textContent = `$${price}`;
+            document.getElementById('selectedPackageCredits').textContent = `${credits} Credits`;
+            
+            // Show payment form
+            document.getElementById('paymentForm').classList.remove('hidden');
+            
+            // Scroll to payment form
+            document.getElementById('paymentForm').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Handle form submission
+        document.getElementById('stripeForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            
+            if (!selectedPackage) {
+                showMessage('Please select a package first', 'error');
+                return;
+            }
+
+            setLoading(true);
+
             try {
-                const clientSecret = await createPaymentIntent(amount);
-                const { error } = await stripe.confirmCardPayment(clientSecret, {
+                // Create payment intent
+                const { clientSecret } = await createPaymentIntent(selectedPackage.price, selectedPackage.credits);
+                
+                // Confirm payment
+                const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
                     payment_method: {
                         card: cardElement,
+                        billing_details: {
+                            name: document.getElementById('cardholder-name').value,
+                        },
                     }
                 });
 
                 if (error) {
-                    console.error(error);
-                    document.getElementById('payment-message').textContent = 'Payment failed';
-                } else {
-                    document.getElementById('payment-message').textContent = 'Payment successful';
-                    updateCreditsInFirestore(credits);
-                    await recordPayment(firebase.auth().currentUser.uid, amount, credits, 'succeeded');
+                    showMessage(`Payment failed: ${error.message}`, 'error');
+                } else if (paymentIntent.status === 'succeeded') {
+                    // Update credits in database
+                    await updateCreditsInDatabase(selectedPackage.credits, paymentIntent.id);
+                    showMessage('Payment successful! Credits added to your account.', 'success');
+                    
+                    // Reset form and hide payment section
+                    document.getElementById('stripeForm').reset();
+                    document.getElementById('paymentForm').classList.add('hidden');
+                    selectedPackage = null;
+                    
+                    // Update credits display
+                    updateCreditsDisplay();
                 }
             } catch (error) {
-                console.error('Error creating payment intent:', error);
-                document.getElementById('payment-message').textContent = 'Error processing payment';
+                console.error('Payment error:', error);
+                showMessage('Payment failed. Please try again.', 'error');
+            } finally {
+                setLoading(false);
             }
-        }
+        });
 
-        async function createPaymentIntent(amount) {
-            const response = await fetch('https://idbyrtwdeeruiutoukct.supabase.co/functions/v1/create-payment-intent', {
+        async function createPaymentIntent(amount, credits) {
+            if (!window.supabaseClient) {
+                throw new Error('Supabase client not initialized');
+            }
+
+            const response = await fetch('/api/create-payment-intent', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlkYnlydHdkZWVydWl1dG91a2N0Iiwicm9zZSI6ImFub24iLCJpYXQiOjE3MzgyNTk0NjQsImV4cCI6MjA1MzgzNTQ2NH0.Hw0oJmIuDGdITM3TZkMWeXkHy53kO4i8TCJMxb6_hko` // Replace with your actual key
                 },
-                body: JSON.stringify({ amount })
+                body: JSON.stringify({
+                    amount: amount * 100, // Convert to cents
+                    credits: credits,
+                    company_id: window.currentUser?.id
+                })
             });
 
-            const data = await response.json();
             if (!response.ok) {
-                throw new Error(data.error || 'Failed to create payment intent');
+                throw new Error('Failed to create payment intent');
             }
-            return data.clientSecret;
+
+            return await response.json();
         }
 
-        function updateCreditsInFirestore(credits) {
-            const userId = firebase.auth().currentUser.uid;
-            const userRef = firebase.firestore().collection('users').doc(userId);
+        async function updateCreditsInDatabase(credits, paymentIntentId) {
+            if (!window.supabaseClient || !window.currentUser) {
+                throw new Error('User not authenticated');
+            }
 
-            userRef.update({
-                credits: firebase.firestore.FieldValue.increment(credits)
-            }).then(() => {
-                console.log('Credits updated successfully');
-            }).catch((error) => {
-                console.error('Error updating credits:', error);
-            });
+            // Add credits to user account
+            const { error: updateError } = await window.supabaseClient
+                .from('moving_companies')
+                .update({ 
+                    credits: window.currentUser.profile.credits + credits 
+                })
+                .eq('id', window.currentUser.id);
+
+            if (updateError) throw updateError;
+
+            // Record the transaction
+            const { error: transactionError } = await window.supabaseClient
+                .from('credit_transactions')
+                .insert([{
+                    company_id: window.currentUser.id,
+                    transaction_type: 'purchase',
+                    amount: credits,
+                    description: `Purchased ${credits} credits`,
+                    stripe_payment_intent_id: paymentIntentId
+                }]);
+
+            if (transactionError) throw transactionError;
+
+            // Update local user profile
+            if (window.currentUser.profile) {
+                window.currentUser.profile.credits += credits;
+            }
         }
 
-        async function recordPayment(userId, amount, credits, paymentStatus) {
-            const { data, error } = await supabaseClient
-                .from('payments')
-                .insert([
-                    { user_id: userId, amount: amount, credits: credits, payment_status: paymentStatus }
-                ]);
+        function setLoading(isLoading) {
+            const submitButton = document.getElementById('submit-button');
+            const buttonText = document.getElementById('button-text');
+            const spinner = document.getElementById('spinner');
 
-            if (error) {
-                console.error('Error recording payment:', error);
+            if (isLoading) {
+                submitButton.disabled = true;
+                buttonText.classList.add('hidden');
+                spinner.classList.remove('hidden');
             } else {
-                console.log('Payment recorded successfully:', data);
+                submitButton.disabled = false;
+                buttonText.classList.remove('hidden');
+                spinner.classList.add('hidden');
             }
+        }
+
+        function updateCreditsDisplay() {
+            if (window.currentUser && window.currentUser.profile) {
+                const creditsElement = document.getElementById('currentCredits');
+                if (creditsElement) {
+                    creditsElement.textContent = window.currentUser.profile.credits || 0;
+                }
+            }
+        }
+
+        function showMessage(message, type = 'info') {
+            const messageDiv = document.getElementById('payment-message');
+            if (!messageDiv) return;
+
+            messageDiv.textContent = message;
+            messageDiv.className = `mt-4 p-4 rounded-lg ${
+                type === 'error' ? 'bg-red-100 text-red-700 border border-red-200' :
+                type === 'success' ? 'bg-green-100 text-green-700 border border-green-200' :
+                'bg-blue-100 text-blue-700 border border-blue-200'
+            }`;
+            messageDiv.classList.remove('hidden');
+
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                messageDiv.classList.add('hidden');
+            }, 5000);
         }
     </script>
 </body>
