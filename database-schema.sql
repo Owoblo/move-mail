@@ -8,9 +8,9 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE TABLE IF NOT EXISTS moving_companies (
     id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
     email TEXT UNIQUE NOT NULL,
-    full_name TEXT NOT NULL,
     company_name TEXT NOT NULL,
     phone TEXT,
+    service_area TEXT,
     promo_code TEXT,
     trial_start_date TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     trial_end_date TIMESTAMP WITH TIME ZONE DEFAULT (NOW() + INTERVAL '30 days'),
@@ -203,9 +203,9 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- Insert sample data for testing (optional)
-INSERT INTO moving_companies (id, email, full_name, company_name, phone, credits, subscription_status)
+INSERT INTO moving_companies (id, email, company_name, phone, service_area, credits, subscription_status)
 VALUES 
-    ('00000000-0000-0000-0000-000000000001', 'demo@example.com', 'Demo Company', 'Demo Movers', '+1234567890', 100, 'trial')
+    ('00000000-0000-0000-0000-000000000001', 'demo@example.com', 'Demo Movers', '+1234567890', 'ontario', 100, 'trial')
 ON CONFLICT (id) DO NOTHING;
 
 -- Grant necessary permissions

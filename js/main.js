@@ -111,13 +111,19 @@ async function handleSignUp(event) {
     return;
   }
   
-  const formData = new FormData(event.target);
-  const email = formData.get('email') || document.getElementById('email').value;
-  const password = formData.get('password') || document.getElementById('password').value;
-  const name = formData.get('name') || document.getElementById('name').value;
-  const company = formData.get('company') || document.getElementById('company').value;
-  const phone = formData.get('phone') || document.getElementById('phone').value;
-  const promoCode = formData.get('promoCode') || document.getElementById('promoCode').value;
+  // Get form values
+  const company = document.getElementById('company').value;
+  const email = document.getElementById('email').value;
+  const phone = document.getElementById('phone').value;
+  const location = document.getElementById('location').value;
+  const password = document.getElementById('password').value;
+  const promoCode = document.getElementById('promoCode').value;
+  
+  // Validate required fields
+  if (!company || !email || !phone || !location || !password) {
+    showMessage('Please fill in all required fields', 'error');
+    return;
+  }
   
   try {
     showMessage('Creating your account...', 'info');
@@ -128,9 +134,9 @@ async function handleSignUp(event) {
       password,
       options: {
         data: {
-          full_name: name,
           company_name: company,
-          phone: phone
+          phone: phone,
+          service_area: location
         }
       }
     });
@@ -145,9 +151,9 @@ async function handleSignUp(event) {
           {
             id: user.id,
             email: email,
-            full_name: name,
             company_name: company,
             phone: phone,
+            service_area: location,
             promo_code: promoCode,
             trial_start_date: new Date().toISOString(),
             trial_end_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
@@ -169,6 +175,34 @@ async function handleSignUp(event) {
   } catch (error) {
     console.error('Sign up error:', error);
     showMessage(`Sign up failed: ${error.message}`, 'error');
+  }
+}
+
+// Google Sign In
+async function signInWithGoogle() {
+  if (!supabaseClient) {
+    showMessage('Configuration error. Please contact support.', 'error');
+    return;
+  }
+  
+  try {
+    showMessage('Signing in with Google...', 'info');
+    
+    const { data, error } = await supabaseClient.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: window.location.origin + '/dashboard.html'
+      }
+    });
+    
+    if (error) throw error;
+    
+    // Google OAuth will redirect to the specified URL
+    // The user will be redirected back after authentication
+    
+  } catch (error) {
+    console.error('Google sign in error:', error);
+    showMessage(`Google sign in failed: ${error.message}`, 'error');
   }
 }
 
@@ -253,13 +287,29 @@ function updateDashboardUI(userProfile) {
   // Update welcome message
   const welcomeMsg = document.getElementById('welcomeMessage');
   if (welcomeMsg) {
-    welcomeMsg.textContent = `Welcome back, ${userProfile.full_name}!`;
+    welcomeMsg.textContent = `Welcome back, ${userProfile.company_name}!`;
   }
   
   // Update credits display
   const creditsEl = document.getElementById('credits');
   if (creditsEl) {
     creditsEl.textContent = userProfile.credits || 0;
+  }
+  
+  // Update service area
+  const serviceAreaEl = document.getElementById('serviceArea');
+  if (serviceAreaEl && userProfile.service_area) {
+    const areaNames = {
+      'ontario': 'Ontario',
+      'british-columbia': 'British Columbia',
+      'alberta': 'Alberta',
+      'quebec': 'Quebec',
+      'nova-scotia': 'Nova Scotia',
+      'manitoba': 'Manitoba',
+      'saskatchewan': 'Saskatchewan',
+      'other': 'Other'
+    };
+    serviceAreaEl.textContent = areaNames[userProfile.service_area] || userProfile.service_area;
   }
   
   // Check trial status
